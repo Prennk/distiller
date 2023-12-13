@@ -29,7 +29,7 @@ model_dict = {
     'vgg19': vgg19_bn,
     'MobileNetV2': mobile_half,
     'ShuffleV1': ShuffleV1,
-    'darknet19': ShuffleV2,
+    'ShuffleV2': ShuffleV2,
     'darknet19': darknet19,
     'darknet53': darknet53,
     'darknet53e': darknet53e,
