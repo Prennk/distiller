@@ -5,6 +5,7 @@ from .vgg import vgg19_bn, vgg16_bn, vgg13_bn, vgg11_bn, vgg8_bn
 from .mobilenetv2 import mobile_half
 from .ShuffleNetv1 import ShuffleV1
 from .ShuffleNetv2 import ShuffleV2
+from .darket import darknet19, darknet53, darknet53e, cspdarknet53
 
 model_dict = {
     'resnet8': resnet8,
@@ -28,5 +29,9 @@ model_dict = {
     'vgg19': vgg19_bn,
     'MobileNetV2': mobile_half,
     'ShuffleV1': ShuffleV1,
-    'ShuffleV2': ShuffleV2,
+    'darknet19': ShuffleV2,
+    'darknet19': darknet19,
+    'darknet53': darknet53,
+    'darknet53e': darknet53e,
+    'cspdarknet53': cspdarknet53,
 }
