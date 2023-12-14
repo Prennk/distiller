@@ -152,8 +152,16 @@ class DarkNet19(nn.Module):
             GlobalAvgPool2d()
         )
 
-    def forward(self, x):
-        return self.classifier(x)
+    def forward(self, x, is_feat=False):
+        if is_feat:
+            feats = []
+            for layer in self.features:
+                x = layer(x)
+                feats.append(x)
+            return feats
+        else:
+            return self.classifier(x)
+        
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -202,8 +210,16 @@ class DarkNet53(nn.Module):
             nn.Linear(1024, num_classes)
         )
 
-    def forward(self, x):
-        return self.classifier(x)
+    def forward(self, x, is_feat=False):
+        if is_feat:
+            feats = []
+            for layer in self.features:
+                x = layer(x)
+                feats.append(x)
+            return feats
+        else:
+            return self.classifier(x)
+        
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -259,9 +275,16 @@ class CSPDarkNet53(nn.Module):
             nn.Linear(1024, num_classes)
         )
 
-    def forward(self, x):
-        return self.classifier(x)
-
+    def forward(self, x, is_feat=False):
+        if is_feat:
+            feats = []
+            for layer in self.features:
+                x = layer(x)
+                feats.append(x)
+            return feats
+        else:
+            return self.classifier(x)
+        
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
