@@ -295,31 +295,47 @@ def cspdarknet53(num_classes=1000, init_weight=True):
 
 
 if __name__ == '__main__':
-    x = torch.randn(1, 3, 224, 224)
+    # x = torch.randn(1, 3, 224, 224)
 
-    darknet19 = darknet19()
+    darknet19 = darknet19(num_classes=100)
     darknet19_features = darknet19.features
 
-    darknet53 = darknet53()
+    darknet53 = darknet53(num_classes=100)
     darknet53_features = darknet53.features
 
-    darknet53e = darknet53e()
+    darknet53e = darknet53e(num_classes=100)
     darknet53e_features = darknet53e.features
 
-    cspdarknet53 = cspdarknet53()
+    cspdarknet53 = cspdarknet53(num_classes=100)
     cspdarknet53_features = cspdarknet53.features
 
-    print('Num. of Params of DarkNet19: {}'.format(sum(p.numel() for p in darknet19.parameters() if p.requires_grad)))
-    print('Num. of Params of DarkNet53: {}'.format(sum(p.numel() for p in darknet53.parameters() if p.requires_grad)))
-    print('Num. of Params of DarkNet53-ELASTIC: {}'.format(sum(p.numel() for p in darknet53e.parameters() if p.requires_grad)))
-    print('Num. of Params of CSP-DarkNet53: {}'.format(sum(p.numel() for p in cspdarknet53.parameters() if p.requires_grad)))
+    # print('Num. of Params of DarkNet19: {}'.format(sum(p.numel() for p in darknet19.parameters() if p.requires_grad)))
+    # print('Num. of Params of DarkNet53: {}'.format(sum(p.numel() for p in darknet53.parameters() if p.requires_grad)))
+    # print('Num. of Params of DarkNet53-ELASTIC: {}'.format(sum(p.numel() for p in darknet53e.parameters() if p.requires_grad)))
+    # print('Num. of Params of CSP-DarkNet53: {}'.format(sum(p.numel() for p in cspdarknet53.parameters() if p.requires_grad)))
 
-    print('Output of DarkNet19: {}'.format(darknet19(x).shape))
-    print('Output of DarkNet53: {}'.format(darknet53(x).shape))
-    print('Output of Elastic DarkNet53-ELASTIC: {}'.format(darknet53e(x).shape))
-    print('Output of CSP-DarkNet53: {}'.format(cspdarknet53(x).shape))
+    # print('Output of DarkNet19: {}'.format(darknet19(x).shape))
+    # print('Output of DarkNet53: {}'.format(darknet53(x).shape))
+    # print('Output of Elastic DarkNet53-ELASTIC: {}'.format(darknet53e(x).shape))
+    # print('Output of CSP-DarkNet53: {}'.format(cspdarknet53(x).shape))
 
-    print('Feature Extractor Output of DarkNet19: {}'.format(darknet19_features(x).shape))
-    print('Feature Extractor Output of DarkNet53: {}'.format(darknet53_features(x).shape))
-    print('Feature Extractor Output of DarkNet53-ELASTIC: {}'.format(darknet53e_features(x).shape))
-    print('Feature Extractor Output of CSP-DarkNet53: {}'.format(cspdarknet53_features(x).shape))
+    # print('Feature Extractor Output of DarkNet19: {}'.format(darknet19_features(x).shape))
+    # print('Feature Extractor Output of DarkNet53: {}'.format(darknet53_features(x).shape))
+    # print('Feature Extractor Output of DarkNet53-ELASTIC: {}'.format(darknet53e_features(x).shape))
+    # print('Feature Extractor Output of CSP-DarkNet53: {}'.format(cspdarknet53_features(x).shape))
+
+    from torchinfo import summary
+    from thop import profile, clever_format
+    x = torch.randn(1, 3, 32, 32)
+
+    # summary(darknet19, input_data=x)
+    # print()
+
+    # summary(darknet53, input_data=x)
+    # print()
+
+    # summary(darknet53e, input_data=x)
+    # print()
+
+    summary(cspdarknet53, input_data=x)
+    print()

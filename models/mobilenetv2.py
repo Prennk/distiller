@@ -179,24 +179,35 @@ def mobilenetv2_T_w(T, W, feature_dim=100):
     model = MobileNetV2(T=T, feature_dim=feature_dim, width_mult=W)
     return model
 
-
-def mobile_half(num_classes):
+def mobilenetv2_6_05(num_classes):
     return mobilenetv2_T_w(6, 0.5, num_classes)
+
+def mobilenetv2_6_1(num_classes):
+    return mobilenetv2_T_w(6, 1, num_classes)
 
 
 if __name__ == '__main__':
-    x = torch.randn(2, 3, 32, 32)
+    from torchinfo import summary
+    import time
+    # x = torch.randn(2, 3, 32, 32)
 
-    net = mobile_half(100)
+    # net = mobile_half(100)
 
-    feats, logit = net(x, is_feat=True, preact=True)
-    for f in feats:
-        print(f.shape, f.min().item())
-    print(logit.shape)
+    # feats, logit = net(x, is_feat=True, preact=True)
+    # for f in feats:
+    #     print(f.shape, f.min().item())
+    # print(logit.shape)
 
-    for m in net.get_bn_before_relu():
-        if isinstance(m, nn.BatchNorm2d):
-            print('pass')
-        else:
-            print('warning')
+    # for m in net.get_bn_before_relu():
+    #     if isinstance(m, nn.BatchNorm2d):
+    #         print('pass')
+    #     else:
+    #         print('warning')
+
+    x = torch.randn(1, 3, 32, 32)
+
+    net = mobilenetv2_6_1(100)
+
+    summary(net, input_data=x)
+
 
