@@ -188,26 +188,26 @@ def mobilenetv2_6_1(num_classes):
 
 if __name__ == '__main__':
     from torchinfo import summary
-    import time
-    # x = torch.randn(2, 3, 32, 32)
 
-    # net = mobile_half(100)
+    x = torch.randn(2, 3, 32, 32)
 
-    # feats, logit = net(x, is_feat=True, preact=True)
-    # for f in feats:
-    #     print(f.shape, f.min().item())
-    # print(logit.shape)
+    net = mobilenetv2_6_05(100)
 
-    # for m in net.get_bn_before_relu():
-    #     if isinstance(m, nn.BatchNorm2d):
-    #         print('pass')
-    #     else:
-    #         print('warning')
+    feats, logit = net(x, is_feat=True, preact=True)
+    for f in feats:
+        print(f.shape, f.min().item())
+    print(logit.shape)
 
-    x = torch.randn(1, 3, 32, 32)
+    for m in net.get_bn_before_relu():
+        if isinstance(m, nn.BatchNorm2d):
+            print('pass')
+        else:
+            print('warning')
 
-    net = mobilenetv2_6_1(100)
+    # x = torch.randn(1, 3, 32, 32)
 
-    summary(net, input_data=x)
+    # net = mobilenetv2_6_1(100)
+
+    # summary(net, input_data=x)
 
 

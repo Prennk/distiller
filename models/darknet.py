@@ -152,16 +152,8 @@ class DarkNet19(nn.Module):
             GlobalAvgPool2d()
         )
 
-    def forward(self, x, is_feat=False):
-        if is_feat:
-            feats = []
-            for layer in self.features:
-                x = layer(x)
-                feats.append(x)
-            return feats
-        else:
-            return self.classifier(x)
-        
+    def forward(self, x):
+        return self.classifier(x)
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -210,16 +202,8 @@ class DarkNet53(nn.Module):
             nn.Linear(1024, num_classes)
         )
 
-    def forward(self, x, is_feat=False):
-        if is_feat:
-            feats = []
-            for layer in self.features:
-                x = layer(x)
-                feats.append(x)
-            return feats
-        else:
-            return self.classifier(x)
-        
+    def forward(self, x):
+        return self.classifier(x)
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -251,40 +235,65 @@ class CSPDarkNet53(nn.Module):
         if init_weight:
             self._initialize_weights()
 
-        self.features = nn.Sequential(
+        self.block1 = nn.Sequential(
             Conv(3, 32, 3),
-
             Conv(32, 64, 3, 2),
-            block(64, 64, num_blocks=1),
-
-            Conv(64, 128, 3, 2),
-            block(128, 128, num_blocks=2),
-
-            Conv(128, 256, 3, 2),
-            block(256, 256, num_blocks=8),
-
-            Conv(256, 512, 3, 2),
-            block(512, 512, num_blocks=8),
-
-            Conv(512, 1024, 3, 2),
-            block(1024, 1024, num_blocks=4)
         )
+
+        self.block2 = CSP(64, 64, num_blocks=1)
+
+        self.block3 = nn.Sequential(
+            Conv(64, 128, 3, 2),
+            CSP(128, 128, num_blocks=2),
+        )
+
+        self.block4 = nn.Sequential(
+            Conv(128, 256, 3, 2),
+            CSP(256, 256, num_blocks=8),
+        )
+
+        self.block5 = nn.Sequential(
+            Conv(256, 512, 3, 2),
+            CSP(512, 512, num_blocks=8),
+        )
+
+        self.block6 = nn.Sequential(
+            Conv(512, 1024, 3, 2),
+            CSP(1024, 1024, num_blocks=4),
+        )
+
         self.classifier = nn.Sequential(
-            *self.features,
             GlobalAvgPool2d(),
             nn.Linear(1024, num_classes)
         )
 
+    def get_bn_before_relu(self):
+        bn1 = self.block1[1].bn
+        bn2 = self.block2.bn
+        bn3 = self.block4[-1].bn
+        bn4 = self.block6[-1].bn
+        return [bn1, bn2, bn3, bn4]
+
     def forward(self, x, is_feat=False):
+        x = self.block1(x)
+        f0 = x
+        x = self.block2(x)
+        f1 = x
+        x = self.block3(x)
+        f2 = x
+        x = self.block4(x)
+        f3 = x
+        x = self.block5(x)
+        f4 = x
+        x = self.block6(x)
+        f5 = x
+        x = self.classifier(x)
+
         if is_feat:
-            feats = []
-            for layer in self.features:
-                x = layer(x)
-                feats.append(x)
-            return feats
+            return [f0, f1, f2, f3, f4, f5], x
         else:
-            return self.classifier(x)
-        
+            return x
+
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -297,7 +306,6 @@ class CSPDarkNet53(nn.Module):
             elif isinstance(m, nn.Linear):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
-
 
 def darknet19(num_classes=1000, init_weight=True):
     return DarkNet19(num_classes=num_classes, init_weight=init_weight)
@@ -316,49 +324,20 @@ def cspdarknet53(num_classes=1000, init_weight=True):
     """ DarkNet53 with CSP block """
     return CSPDarkNet53(CSP, num_classes=num_classes, init_weight=init_weight)
 
+if __name__ == "__main__":
+    x = torch.randn(2, 3, 32, 32)
+    net = cspdarknet53(num_classes=100)
+    feats, logit = net(x, is_feat=True)
 
-if __name__ == '__main__':
-    # x = torch.randn(1, 3, 224, 224)
+    for f in feats:
+        print(f.shape, f.min().item())
+    print(logit.shape)
 
-    darknet19 = darknet19(num_classes=100)
-    darknet19_features = darknet19.features
+    for m in net.get_bn_before_relu():
+        if isinstance(m, nn.BatchNorm2d):
+            print('pass')
+        else:
+            print('warning')
 
-    darknet53 = darknet53(num_classes=100)
-    darknet53_features = darknet53.features
-
-    darknet53e = darknet53e(num_classes=100)
-    darknet53e_features = darknet53e.features
-
-    cspdarknet53 = cspdarknet53(num_classes=100)
-    cspdarknet53_features = cspdarknet53.features
-
-    # print('Num. of Params of DarkNet19: {}'.format(sum(p.numel() for p in darknet19.parameters() if p.requires_grad)))
-    # print('Num. of Params of DarkNet53: {}'.format(sum(p.numel() for p in darknet53.parameters() if p.requires_grad)))
-    # print('Num. of Params of DarkNet53-ELASTIC: {}'.format(sum(p.numel() for p in darknet53e.parameters() if p.requires_grad)))
-    # print('Num. of Params of CSP-DarkNet53: {}'.format(sum(p.numel() for p in cspdarknet53.parameters() if p.requires_grad)))
-
-    # print('Output of DarkNet19: {}'.format(darknet19(x).shape))
-    # print('Output of DarkNet53: {}'.format(darknet53(x).shape))
-    # print('Output of Elastic DarkNet53-ELASTIC: {}'.format(darknet53e(x).shape))
-    # print('Output of CSP-DarkNet53: {}'.format(cspdarknet53(x).shape))
-
-    # print('Feature Extractor Output of DarkNet19: {}'.format(darknet19_features(x).shape))
-    # print('Feature Extractor Output of DarkNet53: {}'.format(darknet53_features(x).shape))
-    # print('Feature Extractor Output of DarkNet53-ELASTIC: {}'.format(darknet53e_features(x).shape))
-    # print('Feature Extractor Output of CSP-DarkNet53: {}'.format(cspdarknet53_features(x).shape))
-
-    from torchinfo import summary
-    from thop import profile, clever_format
-    x = torch.randn(1, 3, 32, 32)
-
-    # summary(darknet19, input_data=x)
-    # print()
-
-    # summary(darknet53, input_data=x)
-    # print()
-
-    # summary(darknet53e, input_data=x)
-    # print()
-
-    summary(cspdarknet53, input_data=x)
-    print()
+    # from torchinfo import summary
+    # summary(net, input_data=x)

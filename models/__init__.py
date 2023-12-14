@@ -5,7 +5,7 @@ from .vgg import vgg19_bn, vgg16_bn, vgg13_bn, vgg11_bn, vgg8_bn
 from .mobilenetv2 import mobilenetv2_6_05, mobilenetv2_6_1
 from .ShuffleNetv1 import ShuffleV1
 from .ShuffleNetv2 import ShuffleV2
-from .darket import darknet19, darknet53, darknet53e, cspdarknet53
+from .darknet import darknet19, darknet53, darknet53e, cspdarknet53
 
 model_dict = {
     'resnet8': resnet8,
