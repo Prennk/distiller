@@ -274,7 +274,7 @@ class CSPDarkNet53(nn.Module):
         bn4 = self.block6[-1].bn
         return [bn1, bn2, bn3, bn4]
 
-    def forward(self, x, is_feat=False):
+    def forward(self, x, is_feat=False, preact=False):
         x = self.block1(x)
         f0 = x
         x = self.block2(x)
