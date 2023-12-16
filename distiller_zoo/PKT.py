@@ -25,6 +25,10 @@ class PKT(nn.Module):
         target_net[target_net != target_net] = 0
 
         # Calculate the cosine similarity
+        print("output_net:")
+        print(output_net)
+        print("target_net:")
+        print(target_net)
         model_similarity = torch.mm(output_net, output_net.transpose(0, 1))
         target_similarity = torch.mm(target_net, target_net.transpose(0, 1))
 
