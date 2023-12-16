@@ -24,12 +24,15 @@ class PKT(nn.Module):
         target_net = target_net / (target_net_norm + eps)
         target_net[target_net != target_net] = 0
 
-        # Calculate the cosine similarity
+        # Calculate the cosine similarity        
+        if output_net.shape != target_net.shape: # cspdarknet53 output_net.shape = torch.Size([64, 1280])
+            output_net = output_net.unsqueeze(dim=-1)
+
         print("output_net shape:")
         print(output_net.shape)
         print("target_net shape:")
         print(target_net.shape)
-        output_net = output_net.unsqueeze(dim=-1)
+        
         model_similarity = torch.mm(output_net, output_net.transpose(0, 1))
         target_similarity = torch.mm(target_net, target_net.transpose(0, 1))
 
