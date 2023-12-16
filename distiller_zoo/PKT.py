@@ -26,8 +26,8 @@ class PKT(nn.Module):
 
         # Calculate the cosine similarity        
         if output_net.shape != target_net.shape: # cspdarknet53 output_net.shape = torch.Size([64, 1280])
-            output_net = output_net.unsqueeze(dim=-1)
-            output_net = output_net.unsqueeze(dim=-1)
+            target_net = target_net.squeeze(dim=-1)
+            target_net = target_net.squeeze(dim=-1)
 
         print("output_net shape:")
         print(output_net.shape)
