@@ -178,32 +178,64 @@ class DarkNet53(nn.Module):
         if init_weight:
             self._initialize_weights()
 
-        self.features = nn.Sequential(
+        self.block1 = nn.Sequential(
             Conv(3, 32, 3),
-
             Conv(32, 64, 3, 2),
-            *self._make_layer(block, 64, num_blocks=1),
+        )
 
+        self.block2 = self._make_layer(block, 64, num_blocks=1)
+
+        self.block3 = nn.Sequential(
             Conv(64, 128, 3, 2),
             *self._make_layer(block, 128, num_blocks=2),
+        )
 
+        self.block4 = nn.Sequential(
             Conv(128, 256, 3, 2),
             *self._make_layer(block, 256, num_blocks=8),
+        )
 
+        self.block5 = nn.Sequential(
             Conv(256, 512, 3, 2),
             *self._make_layer(block, 512, num_blocks=8),
-
-            Conv(512, 1024, 3, 2),
-            *self._make_layer(block, 1024, num_blocks=4)
         )
+
+        self.block6 = nn.Sequential(
+            Conv(512, 1024, 3, 2),
+            *self._make_layer(block, 1024, num_blocks=4),
+        )
+
         self.classifier = nn.Sequential(
-            *self.features,
             GlobalAvgPool2d(),
             nn.Linear(1024, num_classes)
         )
 
-    def forward(self, x):
-        return self.classifier(x)
+    def get_bn_before_relu(self):
+        bn1 = self.block1[1].bn
+        bn2 = self.block2[-1].layer1.bn
+        bn3 = self.block4[-1].layer1.bn
+        bn4 = self.block6[-1].layer1.bn
+        return [bn1, bn2, bn3, bn4]
+
+    def forward(self, x, is_feat=False):
+        x = self.block1(x)
+        f0 = x
+        x = self.block2(x)
+        f1 = x
+        x = self.block3(x)
+        f2 = x
+        x = self.block4(x)
+        f3 = x
+        x = self.block5(x)
+        f4 = x
+        x = self.block6(x)
+        f5 = x
+        x = self.classifier(x)
+
+        if is_feat:
+            return [f0, f1, f2, f3, f4, f5], x
+        else:
+            return x
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -326,7 +358,7 @@ def cspdarknet53(num_classes=1000, init_weight=True):
 
 if __name__ == "__main__":
     x = torch.randn(2, 3, 32, 32)
-    net = cspdarknet53(num_classes=100)
+    net = darknet53(num_classes=100)
     feats, logit = net(x, is_feat=True)
 
     for f in feats:
@@ -339,5 +371,5 @@ if __name__ == "__main__":
         else:
             print('warning')
 
-    # from torchinfo import summary
-    # summary(net, input_data=x)
+    from torchinfo import summary
+    summary(net, input_data=x)
