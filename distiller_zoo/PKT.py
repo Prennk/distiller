@@ -29,11 +29,6 @@ class PKT(nn.Module):
             target_net = target_net.squeeze(dim=-1)
             target_net = target_net.squeeze(dim=-1)
 
-        print("output_net shape:")
-        print(output_net.shape)
-        print("target_net shape:")
-        print(target_net.shape)
-
         model_similarity = torch.mm(output_net, output_net.transpose(0, 1))
         target_similarity = torch.mm(target_net, target_net.transpose(0, 1))
 
