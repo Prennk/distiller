@@ -16,8 +16,8 @@ class FSP(nn.Module):
 
         print(type(s_c))
         print(type(t_c))
-        print(s_c.shape)
-        print(t_c.shape)
+        print(len(s_c))
+        print(len(t_c))
 
         if np.any(np.asarray(s_c) != np.asarray(t_c)):
             raise ValueError('num of channels not equal (error in FSP)')
