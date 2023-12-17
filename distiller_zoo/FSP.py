@@ -13,6 +13,10 @@ class FSP(nn.Module):
         assert len(s_shapes) == len(t_shapes), 'unequal length of feat list'
         s_c = [s[1] for s in s_shapes]
         t_c = [t[1] for t in t_shapes]
+
+        print(type(s_c))
+        print(type(t_c))
+
         if np.any(np.asarray(s_c) != np.asarray(t_c)):
             raise ValueError('num of channels not equal (error in FSP)')
 
