@@ -11,5 +11,5 @@
 (AB) `abound` - Knowledge Transfer via Distillation of Activation Boundaries Formed by Hidden Neurons  
 (FT) `factor` - Paraphrasing Complex Network: Network Compression via Factor Transfer  
 (FSP) `fsp` - A Gift from Knowledge Distillation:Fast Optimization, Network Minimization and Transfer Learning  
-(NST) `nst` - Like what you like: knowledge distill via neuron selectivity transfer
+(NST) `nst` - Like what you like: knowledge distill via neuron selectivity transfer   
 (CRD) `crd` - Contrastive Representation Distillation
