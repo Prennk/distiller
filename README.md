@@ -1,9 +1,9 @@
 # Knowledge Distillation Method
 
--(KD) `kd` - Distilling the Knowledge in a Neural Network  
--(FitNet) `hint` - Fitnets: hints for thin deep nets  
--(AT) `attention` - Paying More Attention to Attention: Improving the Performance of Convolutional Neural Networks via Attention Transfer  
--(SP) `similarity` - Similarity-Preserving Knowledge Distillation  
+- (KD) `kd` - Distilling the Knowledge in a Neural Network  
+- (FitNet) `hint` - Fitnets: hints for thin deep nets  
+- (AT) `attention` - Paying More Attention to Attention: Improving the Performance of Convolutional Neural Networks via Attention Transfer  
+- (SP) `similarity` - Similarity-Preserving Knowledge Distillation  
 (CC) `correlation` - Correlation Congruence for Knowledge Distillation  
 (VID) `vid` - Variational Information Distillation for Knowledge Transfer  
 (RKD) `rkd` - Relational Knowledge Distillation  
