@@ -178,29 +178,29 @@ class DarkNet53(nn.Module):
         if init_weight:
             self._initialize_weights()
 
-        self.block1 = nn.Sequential(
+        self.block0 = nn.Sequential(
             Conv(3, 32, 3),
             Conv(32, 64, 3, 2),
         )
 
-        self.block2 = self._make_layer(block, 64, num_blocks=1)
+        self.block1 = self._make_layer(block, 64, num_blocks=1)
 
-        self.block3 = nn.Sequential(
+        self.block2 = nn.Sequential(
             Conv(64, 128, 3, 2),
             *self._make_layer(block, 128, num_blocks=2),
         )
 
-        self.block4 = nn.Sequential(
+        self.block3 = nn.Sequential(
             Conv(128, 256, 3, 2),
             *self._make_layer(block, 256, num_blocks=8),
         )
 
-        self.block5 = nn.Sequential(
+        self.block4 = nn.Sequential(
             Conv(256, 512, 3, 2),
             *self._make_layer(block, 512, num_blocks=8),
         )
 
-        self.block6 = nn.Sequential(
+        self.block5 = nn.Sequential(
             Conv(512, 1024, 3, 2),
             *self._make_layer(block, 1024, num_blocks=4),
         )
@@ -211,24 +211,24 @@ class DarkNet53(nn.Module):
         )
 
     def get_bn_before_relu(self):
-        bn1 = self.block1[1].bn
+        bn1 = self.block1[-1]
         bn2 = self.block2[-1].layer1.bn
         bn3 = self.block4[-1].layer1.bn
-        bn4 = self.block6[-1].layer1.bn
+        bn4 = self.block5[-1].layer1.bn
         return [bn1, bn2, bn3, bn4]
 
     def forward(self, x, is_feat=False):
-        x = self.block1(x)
+        x = self.block0(x)
         f0 = x
-        x = self.block2(x)
+        x = self.block1(x)
         f1 = x
-        x = self.block3(x)
+        x = self.block2(x)
         f2 = x
-        x = self.block4(x)
+        x = self.block3(x)
         f3 = x
-        x = self.block5(x)
+        x = self.block4(x)
         f4 = x
-        x = self.block6(x)
+        x = self.block5(x)
         f5 = x
         x = self.classifier(x)
 
@@ -267,29 +267,29 @@ class CSPDarkNet53(nn.Module):
         if init_weight:
             self._initialize_weights()
 
-        self.block1 = nn.Sequential(
+        self.block0 = nn.Sequential(
             Conv(3, 32, 3),
             Conv(32, 64, 3, 2),
         )
 
-        self.block2 = CSP(64, 64, num_blocks=1)
+        self.block1 = CSP(64, 64, num_blocks=1)
 
-        self.block3 = nn.Sequential(
+        self.block2 = nn.Sequential(
             Conv(64, 128, 3, 2),
             CSP(128, 128, num_blocks=2),
         )
 
-        self.block4 = nn.Sequential(
+        self.block3 = nn.Sequential(
             Conv(128, 256, 3, 2),
             CSP(256, 256, num_blocks=8),
         )
 
-        self.block5 = nn.Sequential(
+        self.block4 = nn.Sequential(
             Conv(256, 512, 3, 2),
             CSP(512, 512, num_blocks=8),
         )
 
-        self.block6 = nn.Sequential(
+        self.block5 = nn.Sequential(
             Conv(512, 1024, 3, 2),
             CSP(1024, 1024, num_blocks=4),
         )
@@ -300,24 +300,24 @@ class CSPDarkNet53(nn.Module):
         )
 
     def get_bn_before_relu(self):
-        bn1 = self.block1[1].bn
-        bn2 = self.block2.bn
+        bn1 = self.block1.bn
+        bn2 = self.block2[-1].bn
         bn3 = self.block4[-1].bn
-        bn4 = self.block6[-1].bn
+        bn4 = self.block5[-1].bn
         return [bn1, bn2, bn3, bn4]
 
     def forward(self, x, is_feat=False, preact=False):
-        x = self.block1(x)
+        x = self.block0(x)
         f0 = x
-        x = self.block2(x)
+        x = self.block1(x)
         f1 = x
-        x = self.block3(x)
+        x = self.block2(x)
         f2 = x
-        x = self.block4(x)
+        x = self.block3(x)
         f3 = x
-        x = self.block5(x)
+        x = self.block4(x)
         f4 = x
-        x = self.block6(x)
+        x = self.block5(x)
         f5 = x
         x = self.classifier(x)
 
