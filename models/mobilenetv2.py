@@ -179,6 +179,9 @@ def mobilenetv2_T_w(T, W, feature_dim=100):
     model = MobileNetV2(T=T, feature_dim=feature_dim, width_mult=W)
     return model
 
+def mobilenetv2_6_025(num_classes):
+    return mobilenetv2_T_w(6, 0.25, num_classes)
+
 def mobilenetv2_6_05(num_classes):
     return mobilenetv2_T_w(6, 0.5, num_classes)
 
@@ -191,7 +194,7 @@ if __name__ == '__main__':
 
     x = torch.randn(2, 3, 32, 32)
 
-    net = mobilenetv2_6_05(100)
+    net = mobilenetv2_6_025(100)
 
     feats, logit = net(x, is_feat=True, preact=True)
     for f in feats:
@@ -204,10 +207,6 @@ if __name__ == '__main__':
         else:
             print('warning')
 
-    # x = torch.randn(1, 3, 32, 32)
-
-    # net = mobilenetv2_6_1(100)
-
-    # summary(net, input_data=x)
+    summary(net, input_data=x)
 
 

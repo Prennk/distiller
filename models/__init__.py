@@ -2,7 +2,7 @@ from .resnet import resnet8, resnet14, resnet20, resnet32, resnet44, resnet56, r
 from .resnetv2 import ResNet50
 from .wrn import wrn_16_1, wrn_16_2, wrn_40_1, wrn_40_2
 from .vgg import vgg19_bn, vgg16_bn, vgg13_bn, vgg11_bn, vgg8_bn
-from .mobilenetv2 import mobilenetv2_6_05, mobilenetv2_6_1
+from .mobilenetv2 import mobilenetv2_6_05, mobilenetv2_6_1, mobilenetv2_6_025
 from .ShuffleNetv1 import ShuffleV1
 from .ShuffleNetv2 import ShuffleV2
 from .darknet import darknet19, darknet53, darknet53e, cspdarknet53
@@ -27,8 +27,9 @@ model_dict = {
     'vgg13': vgg13_bn,
     'vgg16': vgg16_bn,
     'vgg19': vgg19_bn,
-    'mobilenetv2_6_05': mobilenetv2_6_05,
     'mobilenetv2_6_1': mobilenetv2_6_1,
+    'mobilenetv2_6_05': mobilenetv2_6_05,
+    'mobilenetv2_6_025': mobilenetv2_6_025,
     'ShuffleV1': ShuffleV1,
     'ShuffleV2': ShuffleV2,
     'darknet19': darknet19,
