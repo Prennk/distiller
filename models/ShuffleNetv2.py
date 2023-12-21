@@ -208,3 +208,6 @@ if __name__ == '__main__':
     for f in feats:
         print(f.shape, f.min().item())
     print(logit.shape)
+
+    from torchinfo import summary
+    summary(net, input_data=x)

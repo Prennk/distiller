@@ -55,7 +55,7 @@ def parse_option():
     opt = parser.parse_args()
     
     # set different learning rate from these 4 models
-    if opt.model in ['mobilenetv2_6_05', 'mobilenetv2_6_1', 'ShuffleV1', 'ShuffleV2']:
+    if opt.model in ['mobilenetv2_6_025', 'mobilenetv2_6_05', 'mobilenetv2_6_1', 'ShuffleV1', 'ShuffleV2']:
         opt.learning_rate = 0.01
 
     # set the path according to the environment

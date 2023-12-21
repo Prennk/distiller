@@ -242,7 +242,7 @@ if __name__ == '__main__':
     import torch
 
     x = torch.randn(2, 3, 32, 32)
-    net = resnet8x4(num_classes=20)
+    net = resnet8x4(num_classes=100)
     feats, logit = net(x, is_feat=True, preact=True)
 
     for f in feats:
@@ -254,3 +254,6 @@ if __name__ == '__main__':
             print('pass')
         else:
             print('warning')
+
+    from torchinfo import summary
+    summary(net, input_data=x)
