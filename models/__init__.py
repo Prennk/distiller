@@ -6,6 +6,7 @@ from .mobilenetv2 import mobilenetv2_6_05, mobilenetv2_6_1, mobilenetv2_6_025
 from .ShuffleNetv1 import ShuffleV1
 from .ShuffleNetv2 import ShuffleV2
 from .darknet import darknet19, darknet53, darknet53e, cspdarknet53
+from .efficientnet import efficientnet_b0
 
 model_dict = {
     'resnet8': resnet8,
@@ -36,4 +37,5 @@ model_dict = {
     'darknet53': darknet53,
     'darknet53e': darknet53e,
     'cspdarknet53': cspdarknet53,
+    'efficientnet_b0': efficientnet_b0,
 }

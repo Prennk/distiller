@@ -242,7 +242,7 @@ if __name__ == '__main__':
     import torch
 
     x = torch.randn(2, 3, 32, 32)
-    net = resnet8x4(num_classes=100)
+    net = resnet8(num_classes=100)
     feats, logit = net(x, is_feat=True, preact=True)
 
     for f in feats:
