@@ -195,8 +195,8 @@ def test():
 
     print(model(x).shape)  # (num_examples, num_classes)
 
-def efficientnet_b0():
-    return EfficientNet(version='b0', num_classes=100)
+def efficientnet_b0(num_classes):
+    return EfficientNet(version='b0', num_classes=num_classes)
 
 
 if __name__ == "__main__":
