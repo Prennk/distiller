@@ -210,7 +210,7 @@ def cam():
     target_layers = [model.block5]
 
     # instantiate the model
-    cam = GradCAM(model=test_model, target_layers=target_layers) # use GradCamPlusPlus class
+    cam = GradCAM(model=model, target_layers=target_layers) # use GradCamPlusPlus class
 
     # Preprocess input image, get the input image tensor
     img_original = np.array(PIL.Image.open('./cat.jpg'))
