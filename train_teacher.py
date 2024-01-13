@@ -75,8 +75,12 @@ def parse_option():
     for it in iterations:
         opt.lr_decay_epochs.append(int(it))
 
-    opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
-                                                            opt.weight_decay, opt.trial)
+    if opt.upsample == 'false':
+        opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+                                                                opt.weight_decay, opt.trial)
+    elif opt.upsample == 'true':
+        opt.model_name = '{}_{}_upsampled_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+                                                                opt.weight_decay, opt.trial)
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
     if not os.path.isdir(opt.tb_folder):
