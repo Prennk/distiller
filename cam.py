@@ -200,7 +200,7 @@ def cam():
     model.load_state_dict(
         torch.load(
             './save/models/cspdarknet53_cifar100_lr_0.05_decay_0.0005_trial_1/ckpt_epoch_240.pth',
-            ), strict=False)
+            ))
 
     model.eval()
 
@@ -213,7 +213,7 @@ def cam():
     cam = GradCAM(model=model, target_layers=target_layers) # use GradCamPlusPlus class
 
     # Preprocess input image, get the input image tensor
-    img_original = np.array(PIL.Image.open('./cat.jpg'))
+    img_original = np.array(PIL.Image.open('./apple.jpg'))
     img = cv2.resize(img_original, (32, 32))
     img = np.float32(img) / 255
     input_tensor = preprocess_image(img)
