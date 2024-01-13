@@ -193,7 +193,7 @@ def cam():
     model.load_state_dict(
         torch.load(
             './save/models/cspdarknet53_cifar100_lr_0.05_decay_0.0005_trial_1/ckpt_epoch_240.pth',
-            ), stict=False)
+            ), strict=False)
 
 
 if __name__ == '__main__':
