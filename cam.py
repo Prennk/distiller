@@ -176,6 +176,15 @@ def main():
     torch.save(state, save_file)
 
 def cam():
+    from torchvision import models
+    import numpy as np
+    import cv2
+    import PIL
+
+    from pytorch_grad_cam import GradCAM,GradCAMPlusPlus
+    from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+    from pytorch_grad_cam.utils.image import show_cam_on_image,preprocess_image
+
     opt = parse_option()
 
     # dataloader
@@ -195,6 +204,35 @@ def cam():
             './save/models/cspdarknet53_cifar100_lr_0.05_decay_0.0005_trial_1/ckpt_epoch_240.pth',
             ), strict=False)
 
+    model.eval()
+
+    targets = [ClassifierOutputTarget(2)]
+    target_layers = [model.block5]
+
+    # instantiate the model
+    cam = GradCAM(model=test_model, target_layers=target_layers) # use GradCamPlusPlus class
+
+    # Preprocess input image, get the input image tensor
+    img_original = np.array(PIL.Image.open('./cat.jpg'))
+    img = cv2.resize(img_original, (32, 32))
+    img = np.float32(img) / 255
+    input_tensor = preprocess_image(img)
+
+    # generate CAM
+    grayscale_cams = cam(input_tensor=input_tensor, targets=targets)
+
+    # Upscale CAM result to 300x300
+    cam_upscaled = cv2.resize(grayscale_cams[0, :], (500, 500))
+
+    # Resize the original image to 300x300
+    img_original_upscaled = cv2.resize(img_original, (500, 500))
+    img_original_upscaled = np.float32(img_original_upscaled) / 255  # Ensure the values are in [0, 1]
+
+    cam_image = show_cam_on_image(img_original_upscaled, cam_upscaled, use_rgb=True)
+
+    # display the original image & the associated CAM
+    images = np.hstack((np.uint8(255*img_original_upscaled), cam_image))
+    PIL.Image.fromarray(images)
 
 if __name__ == '__main__':
     cam()
