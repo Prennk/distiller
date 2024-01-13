@@ -197,8 +197,6 @@ def cam():
     # model
     model = model_dict[opt.model](num_classes=n_cls)
 
-    print(model)
-
     model.load_state_dict(
         torch.load(
             './save/models/cspdarknet53_cifar100_lr_0.05_decay_0.0005_trial_1/ckpt_epoch_240.pth',
@@ -208,6 +206,8 @@ def cam():
 
     targets = [ClassifierOutputTarget(2)]
     target_layers = [model.block5]
+
+    print(target_layers)
 
     # instantiate the model
     cam = GradCAM(model=model, target_layers=target_layers) # use GradCamPlusPlus class
