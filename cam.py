@@ -233,6 +233,7 @@ def cam():
     # display the original image & the associated CAM
     images = np.hstack((np.uint8(255*img_original_upscaled), cam_image))
     PIL.Image.fromarray(images)
+    cv2.imwrite('./cam_result.jpg', images)
 
 if __name__ == '__main__':
     cam()
