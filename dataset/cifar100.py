@@ -99,14 +99,14 @@ def get_upsampled_cifar100_dataloaders(batch_size=128, num_workers=8, is_instanc
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
+        transforms.RandomCrop(128, padding=4),
         transforms.RandomHorizontalFlip(),
-        Resize(224),
+        Resize(128),
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
     test_transform = transforms.Compose([
-        Resize(224),
+        Resize(128),
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
@@ -269,14 +269,14 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
+        transforms.RandomCrop(128, padding=4),
         transforms.RandomHorizontalFlip(),
-        Resize(224),
+        Resize(128),
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
     test_transform = transforms.Compose([
-        Resize(224),
+        Resize(128),
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
