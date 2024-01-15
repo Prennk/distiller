@@ -65,7 +65,7 @@ class MobileNetV2(nn.Module):
     """mobilenetV2"""
     def __init__(self, T,
                  feature_dim,
-                 input_size=64, # MANUALLY CHANGE
+                 input_size=128, # MANUALLY CHANGE
                  width_mult=1.,
                  remove_avg=False):
         super(MobileNetV2, self).__init__()
