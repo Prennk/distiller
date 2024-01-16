@@ -13,7 +13,7 @@ import torch.backends.cudnn as cudnn
 
 from models import model_dict
 
-from dataset.cifar100 import get_cifar100_dataloaders, get_upsampled_cifar100_dataloaders
+from dataset.cifar100 import get_cifar100_dataloaders
 
 from helper.util import adjust_learning_rate, accuracy, AverageMeter
 from helper.loops import train_vanilla as train, validate
@@ -41,7 +41,6 @@ def parse_option():
 
     # dataset
     parser.add_argument('--dataset', type=str, default='cifar100', choices=['cifar100'], help='dataset')
-    parser.add_argument('--upsample', type=str, default='false', choices=['true', 'false'], help='upsample dataset')
 
     # model
     parser.add_argument('--model', type=str, default='resnet110',
@@ -75,11 +74,7 @@ def parse_option():
     for it in iterations:
         opt.lr_decay_epochs.append(int(it))
 
-    if opt.upsample == 'false':
-        opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
-                                                                opt.weight_decay, opt.trial)
-    elif opt.upsample == 'true':
-        opt.model_name = '{}_{}_upsampled_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+    opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
                                                                 opt.weight_decay, opt.trial)
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
@@ -100,12 +95,8 @@ def main():
 
     # dataloader
     if opt.dataset == 'cifar100':
-        if opt.upsample == 'false':
-            train_loader, val_loader = get_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
-            n_cls = 100
-        elif opt.upsample == 'true':
-            train_loader, val_loader = get_upsampled_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
-            n_cls = 100
+        train_loader, val_loader = get_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
+        n_cls = 100
     else:
         raise NotImplementedError(opt.dataset)
 
