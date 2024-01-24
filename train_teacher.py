@@ -14,6 +14,7 @@ import torch.backends.cudnn as cudnn
 from models import model_dict
 
 from dataset.cifar100 import get_cifar100_dataloaders
+from dataset.cifar100 import get_upsampled_cifar100_dataloaders, get_upsampled_cifar100_dataloaders_sample
 
 from helper.util import adjust_learning_rate, accuracy, AverageMeter
 from helper.loops import train_vanilla as train, validate
@@ -41,6 +42,7 @@ def parse_option():
 
     # dataset
     parser.add_argument('--dataset', type=str, default='cifar100', choices=['cifar100'], help='dataset')
+    parser.add_argument('--upsample', action='store_true', help='upsample 416x416')
 
     # model
     parser.add_argument('--model', type=str, default='resnet110',
@@ -74,8 +76,12 @@ def parse_option():
     for it in iterations:
         opt.lr_decay_epochs.append(int(it))
 
-    opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
-                                                                opt.weight_decay, opt.trial)
+    if opt.upsample:
+        opt.model_name = '[Upsample]{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+                                                                    opt.weight_decay, opt.trial)
+    else:
+        opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+                                                                    opt.weight_decay, opt.trial)
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
     if not os.path.isdir(opt.tb_folder):
@@ -95,8 +101,12 @@ def main():
 
     # dataloader
     if opt.dataset == 'cifar100':
-        train_loader, val_loader = get_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
-        n_cls = 100
+        if opt.upsample:
+            train_loader, val_loader = get_upsampled_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
+            n_cls = 100
+        else:
+            train_loader, val_loader = get_cifar100_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
+            n_cls = 100
     else:
         raise NotImplementedError(opt.dataset)
 

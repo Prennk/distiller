@@ -21,6 +21,7 @@ from models.util import Embed, ConvReg, LinearEmbed
 from models.util import Connector, Translator, Paraphraser
 
 from dataset.cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
+from dataset.cifar100 import get_upsampled_cifar100_dataloaders, get_upsampled_cifar100_dataloaders_sample
 
 from helper.util import adjust_learning_rate
 
@@ -55,6 +56,7 @@ def parse_option():
 
     # dataset
     parser.add_argument('--dataset', type=str, default='cifar100', choices=['cifar100'], help='dataset')
+    parser.add_argument('--upsample', action='store_true', help='upsample 416x416')
 
     # model
     parser.add_argument('--model_s', type=str, default='resnet8',
@@ -111,8 +113,13 @@ def parse_option():
 
     opt.model_t = get_teacher_name(opt.path_t)
 
-    opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
+    if opt.upsample:
+        opt.model_name = '[Upsample]S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
                                                                 opt.gamma, opt.alpha, opt.beta, opt.trial)
+    else:
+        opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
+                                                                opt.gamma, opt.alpha, opt.beta, opt.trial)
+
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
     if not os.path.isdir(opt.tb_folder):
@@ -154,10 +161,16 @@ def main():
     # dataloader
     if opt.dataset == 'cifar100':
         if opt.distill in ['crd']:
-            train_loader, val_loader, n_data = get_cifar100_dataloaders_sample(batch_size=opt.batch_size,
+            if opt.upsample:
+                train_loader, val_loader, n_data = get_upsampled_cifar100_dataloaders_sample(batch_size=opt.batch_size,
                                                                                num_workers=opt.num_workers,
                                                                                k=opt.nce_k,
                                                                                mode=opt.mode)
+            else:
+                train_loader, val_loader, n_data = get_cifar100_dataloaders_sample(batch_size=opt.batch_size,
+                                                                                num_workers=opt.num_workers,
+                                                                                k=opt.nce_k,
+                                                                                mode=opt.mode)
         else:
             train_loader, val_loader, n_data = get_cifar100_dataloaders(batch_size=opt.batch_size,
                                                                         num_workers=opt.num_workers,
