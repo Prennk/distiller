@@ -194,7 +194,8 @@ if __name__ == '__main__':
 
     x = torch.randn(2, 3, 32, 32)
 
-    net = mobilenetv2_6_025(100)
+    net = mobilenetv2_6_05(100)
+    # summary(net)
 
     feats, logit = net(x, is_feat=True, preact=True)
     for f in feats:
@@ -207,6 +208,6 @@ if __name__ == '__main__':
         else:
             print('warning')
 
-    summary(net, input_data=x)
+    # summary(net, input_data=x)
 
 
