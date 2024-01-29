@@ -117,7 +117,7 @@ def main():
 
     if opt.resume:
         model.load_state_dict(torch.load(opt.checkpoint_path)['model'])
-        current_epoch = torch.load(opt.checkpoint_path)['epoch']
+        current_epoch = torch.load(opt.checkpoint_path)['epoch'] + 1
 
     # optimizer
     optimizer = optim.SGD(model.parameters(),
