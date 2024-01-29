@@ -33,7 +33,6 @@ def parse_option():
     parser.add_argument('--num_workers', type=int, default=8, help='num of workers to use')
     parser.add_argument('--epochs', type=int, default=240, help='number of training epochs')
     parser.add_argument('--resume', action='store_true', help='resume train')
-    parser.add_argument('--resume_epoch', type=int, help='resume epoch')
     parser.add_argument('--checkpoint_path', type=str, default='', help='checkpoint path')
 
     # optimization
@@ -117,8 +116,8 @@ def main():
     model = model_dict[opt.model](num_classes=n_cls)
 
     if opt.resume:
-        model.load_state_dict(torch.load(opt.checkpoint_path))
-        opt.epoch = opt.resume_epoch
+        model.load_state_dict(torch.load(opt.checkpoint_path)['model'])
+        opt.epoch = torch.load(opt.checkpoint_path)['epoch']
 
     # optimizer
     optimizer = optim.SGD(model.parameters(),
