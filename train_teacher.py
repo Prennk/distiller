@@ -117,7 +117,7 @@ def main():
 
     if opt.resume:
         model.load_state_dict(torch.load(opt.checkpoint_path)['model'])
-        opt.epoch = torch.load(opt.checkpoint_path)['epoch']
+        current_epoch = torch.load(opt.checkpoint_path)['epoch']
 
     # optimizer
     optimizer = optim.SGD(model.parameters(),
@@ -136,7 +136,7 @@ def main():
     logger = tb_logger.Logger(logdir=opt.tb_folder, flush_secs=2)
 
     # routine
-    for epoch in range(1, opt.epochs + 1):
+    for epoch in range(current_epoch if opt.resume else 1, opt.epochs + 1):
 
         adjust_learning_rate(epoch, opt, optimizer)
         print("==> training...")
