@@ -144,8 +144,8 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
                              shuffle=False,
                              num_workers=int(num_workers/2))
 
-    print(f"Train: {len(n_train_data)}")
-    print(f"test: {len(n_test_data)}")
+    print(f"Train: {n_train_data}")
+    print(f"test: {n_test_data}")
     if is_instance:
         return train_loader, test_loader, n_data
     else:
