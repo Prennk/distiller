@@ -278,6 +278,8 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=409
     """
     data_folder = get_data_folder()
 
+    print("Resolution 416x416")
+
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -300,6 +302,7 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=409
                                        is_sample=is_sample,
                                        percent=percent)
     n_data = len(train_set)
+    print(f"Train: {n_data}")
     train_loader = DataLoader(train_set,
                               batch_size=batch_size,
                               shuffle=True,
