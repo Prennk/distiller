@@ -98,6 +98,7 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     """
     cifar 100
     """
+    print("Resolution 416x416")
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
@@ -143,6 +144,8 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
                              shuffle=False,
                              num_workers=int(num_workers/2))
 
+    print(f"Train: {len(n_train_data)}")
+    print(f"test: {len(n_test_data)}")
     if is_instance:
         return train_loader, test_loader, n_data
     else:
