@@ -94,7 +94,7 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
     else:
         return train_loader, test_loader
 
-def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=False, use_percent=0.05):
+def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=False, use_percent=0.06):
     """
     cifar 100
     """
