@@ -94,7 +94,7 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
     else:
         return train_loader, test_loader
 
-def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=False, use_percent=0.06):
+def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=False, use_subset=True):
     """
     cifar 100
     """
@@ -121,24 +121,31 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
                                      transform=train_transform)
         n_data = len(train_set)
     else:
-        train_set = datasets.CIFAR100(root=data_folder,
-                                      download=True,
-                                      train=True,
-                                      transform=train_transform)
-        n_train_data = int(use_percent * len(train_set))
-        train_set = Subset(train_set, range(n_train_data))
+        if use_subset:
+            n_train_data = 3000
+            full_train_set = datasets.CIFAR100(root=data_folder, download=True, train=True, transform=train_transform)
+            train_set = Subset(full_train_set, list(range(n_train_data)))
+        else:
+            train_set = datasets.CIFAR100(root=data_folder,
+                                        download=True,
+                                        train=True,
+                                        transform=train_transform)
 
     train_loader = DataLoader(train_set,
                               batch_size=batch_size,
                               shuffle=True,
                               num_workers=num_workers)
 
-    test_set = datasets.CIFAR100(root=data_folder,
-                                 download=True,
-                                 train=False,
-                                 transform=test_transform)
-    n_test_data = int(use_percent * len(test_set))
-    test_set = Subset(test_set, range(n_test_data))
+    if use_subset:
+        n_test_data = 600
+        full_test_set = datasets.CIFAR100(root=data_folder, download=True, train=False, transform=test_transform)
+        test_set = Subset(full_test_set, list(range(n_test_data)))
+    else:
+        test_set = datasets.CIFAR100(root=data_folder,
+                                    download=True,
+                                    train=False,
+                                    transform=test_transform)
+
     test_loader = DataLoader(test_set,
                              batch_size=int(batch_size/2),
                              shuffle=False,
