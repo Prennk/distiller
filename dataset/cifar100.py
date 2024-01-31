@@ -272,13 +272,14 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     return train_loader, test_loader, n_data
 
 def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=4096, mode='exact',
-                                    is_sample=True, percent=1.0):
+                                    is_sample=True, percent=0.06):
     """
     cifar 100
     """
     data_folder = get_data_folder()
 
     print("Resolution 416x416")
+    print("Sample dataloader for contrastive")
 
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
