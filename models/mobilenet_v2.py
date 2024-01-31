@@ -117,39 +117,44 @@ class MobileNetV2(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.zeros_(m.bias)
 
-    def get_bn_before_relu(self):
-        bn1 = self.features[3].conv[-1]
-        bn2 = self.features[6].conv[-1]
-        bn3 = self.features[13].conv[-1]
-        bn4 = self.features[17].conv[-1]
-        return [bn1, bn2, bn3, bn4]
+    # def get_bn_before_relu(self):
+    #     bn1 = self.features[3].conv[-1]
+    #     bn2 = self.features[6].conv[-1]
+    #     bn3 = self.features[13].conv[-1]
+    #     bn4 = self.features[17].conv[-1]
+    #     return [bn1, bn2, bn3, bn4]
 
-    def forward(self, x, is_feat=False, preact=False):
-        x = self.features[0](x)
-        f0 = x
-
-        x = self.features[1:4](x)
-        f1 = x
-
-        x = self.features[4:7](x)
-        f2 = x
-
-        x = self.features[7:14](x)
-        f3 = x
-        
-        x = self.features[14:18](x)
-        f4 = x
-
-        x = self.features[18](x)
+    def forward(self, x):
+        x = self.features(x)
         x = x.mean([2, 3])
-        f5 = x
-
         x = self.classifier(x)
+        return x
+    
+        # x = self.features[0](x)
+        # f0 = x
 
-        if is_feat:
-            return [f0, f1, f2, f3, f4, f5], x
-        else:
-            return x
+        # x = self.features[1:4](x)
+        # f1 = x
+
+        # x = self.features[4:7](x)
+        # f2 = x
+
+        # x = self.features[7:14](x)
+        # f3 = x
+        
+        # x = self.features[14:18](x)
+        # f4 = x
+
+        # x = self.features[18](x)
+        # x = x.mean([2, 3])
+        # f5 = x
+
+        # x = self.classifier(x)
+
+        # if is_feat:
+        #     return [f0, f1, f2, f3, f4, f5], x
+        # else:
+        #     return x
 
 def mobilenet_v2(pretrained=False, progress=True):
     model = MobileNetV2(width_mult=1.0)
@@ -160,9 +165,57 @@ def mobilenet_v2(pretrained=False, progress=True):
 
     return model
 
-def mobilenet_v2_half(num_classes=100):
-    model = MobileNetV2(num_classes=num_classes, width_mult=0.5)
+def mobilenet_v2_half(pretrained=False, progress=True):
+    model = MobileNetV2(width_mult=0.5)
+    if pretrained:
+        raise ValueError('No Pretrained!!!!')
+
     return model
+
+class MobileNetV2_half(nn.Module):
+    def __init__(self, pretrained = False):
+        super(MobileNetV2_half, self).__init__()
+        self.model = mobilenet_v2_half(pretrained=pretrained)
+
+    def forward(self, x, is_feat=False, preact=False):
+        x = self.model.features[0](x)
+        f0 = x
+
+        x = self.model.features[1:4](x)
+        f1 = x
+
+        x = self.model.features[4:7](x)
+        f2 = x
+
+        x = self.model.features[7:14](x)
+        f3 = x
+        
+        x = self.model.features[14:18](x)
+        f4 = x
+
+        x = self.model.features[18](x)
+        x = x.mean([2, 3])
+        f5 = x
+
+        x = self.model.classifier(x)
+
+        if is_feat:
+            return [f0, f1, f2, f3, f4, f5], x
+        else:
+            return x
+
+        # out3 = self.model.features[:7](x)
+        # out4 = self.model.features[7:14](out3)
+        # out5 = self.model.features[14:18](out4)
+        # return out3, out4, out5
+
+class MobileNetV2_half_Backbone(nn.Module):
+    def __init__(self):
+        super(MobileNetV2_half_Backbone, self).__init__()
+        self.backbone = MobileNetV2_half(pretrained=False)
+
+    def forward(self, x):
+        return self.backbone(x)
 
 if __name__ == "__main__":
     # print(mobilenet_v2())
