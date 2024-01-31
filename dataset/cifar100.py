@@ -166,11 +166,15 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
         num_classes = 100
         if self.train:
-            num_samples = len(self.data)
+            # num_samples = len(self.data)
             label = self.targets
+            num_samples = 3000
+            label = self.targets[:num_samples]
         else:
-            num_samples = len(self.data)
+            # num_samples = len(self.data)
             label = self.targets
+            num_samples = 600
+            label = self.targets[-num_samples:]
 
         self.cls_positive = [[] for i in range(num_classes)]
         for i in range(num_samples):
@@ -229,7 +233,7 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
 
 def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode='exact',
-                                    is_sample=True, percent=1.0, use_percent=0.06):
+                                    is_sample=True, percent=1.0, use_percent=1.0):
     """
     cifar 100
     """
