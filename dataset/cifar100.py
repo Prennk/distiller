@@ -272,7 +272,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     return train_loader, test_loader, n_data
 
 def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=4096, mode='exact',
-                                    is_sample=True, percent=0.06):
+                                    is_sample=True, percent=1.0, use_percent=0.06):
     """
     cifar 100
     """
@@ -302,12 +302,18 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=409
                                        mode=mode,
                                        is_sample=is_sample,
                                        percent=percent)
+    
+    n_train_data = int(use_percent * len(train_set))
+    train_set = Subset(train_set, range(n_train_data))
     n_data = len(train_set)
-    print(f"Train: {n_data}")
+
     train_loader = DataLoader(train_set,
                               batch_size=batch_size,
                               shuffle=True,
                               num_workers=num_workers)
+
+    n_test_data = int(use_percent * len(test_set))
+    test_set = Subset(test_set, range(n_test_data))
 
     test_set = datasets.CIFAR100(root=data_folder,
                                  download=True,
@@ -317,5 +323,8 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=409
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
+    
+    print(f"Train: {n_train_data}")
+    print(f"test: {n_test_data}")
 
     return train_loader, test_loader, n_data
