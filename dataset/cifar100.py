@@ -235,6 +235,9 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     """
     data_folder = get_data_folder()
 
+    print("Resolution 32x32")
+    print("Sample dataloader for contrastive")
+
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -276,6 +279,9 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
+    
+    print(f"Train: {n_train_data}")
+    print(f"test: {n_test_data}")
 
     return train_loader, test_loader, n_data
 
