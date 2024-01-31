@@ -206,8 +206,6 @@ def main():
     elif opt.distill == 'crd':
         opt.s_dim = feat_s[-1].shape[1]
         opt.t_dim = feat_t[-1].shape[1]
-        print('s_dim: ', opt.s_dim)
-        print('t_dim: ', opt.t_dim)
         opt.n_data = n_data
         criterion_kd = CRDLoss(opt)
         module_list.append(criterion_kd.embed_s)
