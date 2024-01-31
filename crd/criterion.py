@@ -39,7 +39,9 @@ class CRDLoss(nn.Module):
         Returns:
             The contrastive loss
         """
+        print('\nstudent embed')
         f_s = self.embed_s(f_s)
+        print('\nteacher embed')
         f_t = self.embed_t(f_t)
         out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
         s_loss = self.criterion_s(out_s)

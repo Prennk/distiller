@@ -286,7 +286,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     return train_loader, test_loader, n_data
 
 def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=4096, mode='exact',
-                                    is_sample=True, percent=0.06, use_percent=0.06):
+                                    is_sample=True, percent=1.0, use_percent=0.06):
     """
     cifar 100
     """
