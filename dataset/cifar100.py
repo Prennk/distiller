@@ -229,7 +229,7 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
 
 def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode='exact',
-                                    is_sample=True, percent=1.0, use_percent=0.01):
+                                    is_sample=True, percent=1.0, use_percent=0.06):
     """
     cifar 100
     """
