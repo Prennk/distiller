@@ -78,7 +78,8 @@ class ContrastLoss(nn.Module):
 
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, dim_in=1024, dim_out=128):
+    # def __init__(self, dim_in=1024, dim_out=128):
+    def __init__(self, dim_in=216320, dim_out=128):
         super(Embed, self).__init__()
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
