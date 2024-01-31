@@ -178,31 +178,7 @@ class MobileNetV2_half(nn.Module):
         self.model = mobilenet_v2_half(num_classes=num_classes, pretrained=pretrained)
 
     def forward(self, x, is_feat=False, preact=False):
-        x = self.model.features[0](x)
-        f0 = x
-
-        x = self.model.features[1:4](x)
-        f1 = x
-
-        x = self.model.features[4:7](x)
-        f2 = x
-
-        x = self.model.features[7:14](x)
-        f3 = x
-        
-        x = self.model.features[14:18](x)
-        f4 = x
-
-        x = self.model.features[18](x)
-        x = x.mean([2, 3])
-        f5 = x
-
-        x = self.model.classifier(x)
-
-        if is_feat:
-            return [f0, f1, f2, f3, f4, f5], x
-        else:
-            return x
+        return self.model(x)
 
         # out3 = self.model.features[:7](x)
         # out4 = self.model.features[7:14](out3)
@@ -215,7 +191,31 @@ class MobileNetV2_half_Backbone(nn.Module):
         self.backbone = MobileNetV2_half(num_classes=num_classes, pretrained=False)
 
     def forward(self, x, is_feat=False, preact=False):
-        return self.backbone(x)
+        x = self.backbone.model.features[0](x)
+        f0 = x
+
+        x = self.backbone.model.features[1:4](x)
+        f1 = x
+
+        x = self.backbone.model.features[4:7](x)
+        f2 = x
+
+        x = self.backbone.model.features[7:14](x)
+        f3 = x
+        
+        x = self.backbone.model.features[14:18](x)
+        f4 = x
+
+        x = self.backbone.model.features[18](x)
+        x = x.mean([2, 3])
+        f5 = x
+
+        x = self.backbone.model.classifier(x)
+
+        if is_feat:
+            return [f0, f1, f2, f3, f4, f5], x
+        else:
+            return x
 
 if __name__ == "__main__":
     # print(mobilenet_v2())
