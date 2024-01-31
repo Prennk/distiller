@@ -89,12 +89,23 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
-        print('x ori:' , x.shape)
-        x = x.view(x.shape[0], -1)
-        print('x flatten:', x.shape)
-        x = self.linear(x)
-        print('x after linear:', x.shape)
-        x = self.l2norm(x)
+        if x.shape[1] == 1280 and x.shape[2] == 1:
+            print('x ori:' , x.shape)
+            x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
+            print('x after GAP:', x.shape)
+            x = x.view(x.shape[0], -1)
+            print('x flatten:', x.shape)
+            x = self.linear(x)
+            print('x after linear:', x.shape)
+            x = self.l2norm(x)
+        else:
+            print('x ori:' , x.shape)
+            x = x.view(x.shape[0], -1)
+            print('x flatten:', x.shape)
+            x = self.linear(x)
+            print('x after linear:', x.shape)
+            x = self.l2norm(x)
+
         return x
 
 
