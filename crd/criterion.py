@@ -46,6 +46,7 @@ class CRDLoss(nn.Module):
         t_loss = self.criterion_t(out_t)
         loss = s_loss + t_loss
         return loss
+        assert()
 
 
 class ContrastLoss(nn.Module):
