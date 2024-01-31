@@ -89,6 +89,7 @@ class Embed(nn.Module):
         x = x.view(x.shape[0], -1)
         print('x flatten:', x.shape)
         x = self.linear(x)
+        print('x after linear:', x.shape)
         x = self.l2norm(x)
         return x
 
