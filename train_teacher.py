@@ -79,7 +79,7 @@ def parse_option():
         opt.lr_decay_epochs.append(int(it))
 
     if opt.upsample:
-        opt.model_name = '[Upsample]{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+        opt.model_name = '{}_UPSAMPLE_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
                                                                     opt.weight_decay, opt.trial)
     else:
         opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
