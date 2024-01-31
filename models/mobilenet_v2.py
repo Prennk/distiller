@@ -214,7 +214,7 @@ class MobileNetV2_half_Backbone(nn.Module):
         super(MobileNetV2_half_Backbone, self).__init__()
         self.backbone = MobileNetV2_half(num_classes=num_classes, pretrained=False)
 
-    def forward(self, x):
+    def forward(self, x, is_feat=False, preact=False):
         return self.backbone(x)
 
 if __name__ == "__main__":
