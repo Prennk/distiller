@@ -85,8 +85,9 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
+        print('x ori:' , x)
         x = x.view(x.shape[0], -1)
-        print('x:', x.shape)
+        print('x flatten:', x.shape)
         x = self.linear(x)
         x = self.l2norm(x)
         return x
