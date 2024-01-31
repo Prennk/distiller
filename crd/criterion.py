@@ -39,16 +39,13 @@ class CRDLoss(nn.Module):
         Returns:
             The contrastive loss
         """
-        print('\nstudent embed')
         f_s = self.embed_s(f_s)
-        print('\nteacher embed')
         f_t = self.embed_t(f_t)
         out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
         s_loss = self.criterion_s(out_s)
         t_loss = self.criterion_t(out_t)
         loss = s_loss + t_loss
         return loss
-        assert()
 
 
 class ContrastLoss(nn.Module):
@@ -90,7 +87,6 @@ class Embed(nn.Module):
 
     def forward(self, x):
         if x.shape[1] == 1024:
-            print(x.shape)
             if x.shape[2] != 1:
                 x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
                 x = x.view(x.shape[0], -1)
