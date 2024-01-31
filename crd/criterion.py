@@ -89,7 +89,8 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
-        if x.shape[1] == 1280:
+        if x.shape[1] == 1024:
+            print(x.shape)
             if x.shape[2] != 1:
                 print('x ori:' , x.shape)
                 x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
