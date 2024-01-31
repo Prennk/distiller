@@ -124,7 +124,7 @@ class MobileNetV2(nn.Module):
         bn4 = self.features[17].conv[-1]
         return [bn1, bn2, bn3, bn4]
 
-    def forward(self, x, is_feat=False):
+    def forward(self, x, is_feat=False, preact=False):
         x = self.features[0](x)
         f0 = x
 
