@@ -114,7 +114,7 @@ def parse_option():
     opt.model_t = get_teacher_name(opt.path_t)
 
     if opt.upsample:
-        opt.model_name = '[Upsample]S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
+        opt.model_name = 'S:{}_T:{}_UPSAMPLE_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
                                                                 opt.gamma, opt.alpha, opt.beta, opt.trial)
     else:
         opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
