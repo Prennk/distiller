@@ -312,13 +312,14 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=409
                               shuffle=True,
                               num_workers=num_workers)
 
-    n_test_data = int(use_percent * len(test_set))
-    test_set = Subset(test_set, range(n_test_data))
-
     test_set = datasets.CIFAR100(root=data_folder,
                                  download=True,
                                  train=False,
                                  transform=test_transform)
+    
+    n_test_data = int(use_percent * len(test_set))
+    test_set = Subset(test_set, range(n_test_data))
+    
     test_loader = DataLoader(test_set,
                              batch_size=int(batch_size/2),
                              shuffle=False,
