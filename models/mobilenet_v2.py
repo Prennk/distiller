@@ -165,17 +165,17 @@ def mobilenet_v2(pretrained=False, progress=True):
 
     return model
 
-def mobilenet_v2_half(pretrained=False, progress=True):
-    model = MobileNetV2(width_mult=0.5)
+def mobilenet_v2_half(num_classes=1000, pretrained=False, progress=True):
+    model = MobileNetV2(width_mult=0.5, num_classes=num_classes)
     if pretrained:
         raise ValueError('No Pretrained!!!!')
 
     return model
 
 class MobileNetV2_half(nn.Module):
-    def __init__(self, pretrained = False):
+    def __init__(self, num_classes=1000, pretrained = False):
         super(MobileNetV2_half, self).__init__()
-        self.model = mobilenet_v2_half(pretrained=pretrained)
+        self.model = mobilenet_v2_half(num_classes=num_classes, pretrained=pretrained)
 
     def forward(self, x, is_feat=False, preact=False):
         x = self.model.features[0](x)
@@ -210,9 +210,9 @@ class MobileNetV2_half(nn.Module):
         # return out3, out4, out5
 
 class MobileNetV2_half_Backbone(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=1000):
         super(MobileNetV2_half_Backbone, self).__init__()
-        self.backbone = MobileNetV2_half(pretrained=False)
+        self.backbone = MobileNetV2_half(num_classes=num_classes, pretrained=False)
 
     def forward(self, x):
         return self.backbone(x)
