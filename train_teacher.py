@@ -54,7 +54,7 @@ def parse_option():
                                  'vgg8', 'vgg11', 'vgg13', 'vgg16', 'vgg19',
                                  'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_6_025', 'mobilenet_v2_half',
                                  'ShuffleV1', 'ShuffleV2', 
-                                 'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53',
+                                 'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
                                  'efficientnet_b0'])
 
     parser.add_argument('-t', '--trial', type=int, default=0, help='the experiment id')

@@ -7,6 +7,7 @@ from .mobilenet_v2 import MobileNetV2_half_Backbone
 from .ShuffleNetv1 import ShuffleV1
 from .ShuffleNetv2 import ShuffleV2
 from .darknet import darknet19, darknet53, darknet53e, cspdarknet53
+from .CSPdarknet import CSPDarkNet53Backbone
 from .efficientnet import efficientnet_b0
 
 model_dict = {
@@ -39,5 +40,6 @@ model_dict = {
     'darknet53': darknet53,
     'darknet53e': darknet53e,
     'cspdarknet53': cspdarknet53,
+    'cspdarknet53_backbone': CSPDarkNet53Backbone,
     'efficientnet_b0': efficientnet_b0,
 }

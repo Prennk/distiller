@@ -66,7 +66,7 @@ def parse_option():
                                  'vgg8', 'vgg11', 'vgg13', 'vgg16', 'vgg19',
                                  'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_6_025', 'mobilenet_v2_half',
                                  'ShuffleV1', 'ShuffleV2', 
-                                 'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53'])
+                                 'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone'])
     parser.add_argument('--path_t', type=str, default=None, help='teacher model snapshot')
 
     # distillation

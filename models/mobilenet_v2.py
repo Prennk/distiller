@@ -172,6 +172,7 @@ def mobilenet_v2_half(num_classes=1000, pretrained=False, progress=True):
 
     return model
 
+# self.backbone.model <--- buat key model
 class MobileNetV2_half(nn.Module):
     def __init__(self, num_classes=1000, pretrained = False):
         super(MobileNetV2_half, self).__init__()
@@ -185,6 +186,7 @@ class MobileNetV2_half(nn.Module):
         # out5 = self.model.features[14:18](out4)
         # return out3, out4, out5
 
+# self.backbone.model <--- buat key .backbone
 class MobileNetV2_half_Backbone(nn.Module):
     def __init__(self, num_classes=1000):
         super(MobileNetV2_half_Backbone, self).__init__()
