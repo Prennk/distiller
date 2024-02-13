@@ -22,6 +22,7 @@ from models.util import Connector, Translator, Paraphraser
 
 from dataset.cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
 from dataset.cifar100 import get_upsampled_cifar100_dataloaders, get_upsampled_cifar100_dataloaders_sample
+from dataset.roadsign import get_road_sign_dataloaders, get_road_signs_contrastive_dataloaders
 
 from helper.util import adjust_learning_rate
 
@@ -55,7 +56,7 @@ def parse_option():
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 
     # dataset
-    parser.add_argument('--dataset', type=str, default='cifar100', choices=['cifar100'], help='dataset')
+    parser.add_argument('--dataset', type=str, default='None', choices=['cifar100', 'road_sign'], help='dataset')
     parser.add_argument('--upsample', action='store_true', help='upsample 416x416')
 
     # model
@@ -176,6 +177,18 @@ def main():
                                                                         num_workers=opt.num_workers,
                                                                         is_instance=True)
         n_cls = 100
+    elif opt.dataset == 'road_sign':
+        if opt.distill in ['crd']:
+            train_loader, val_loader, n_data = get_road_signs_contrastive_dataloaders(batch_size=opt.batch_size,
+                                                                               num_workers=opt.num_workers,
+                                                                               k=opt.nce_k,
+                                                                               mode=opt.mode)
+        else:
+            train_loader, val_loader, n_data = get_cifar100_dataloaders(batch_size=opt.batch_size,
+                                                                        num_workers=opt.num_workers,
+                                                                        is_instance=True)
+            train_loader, val_loader = get_road_sign_dataloaders(batch_size=opt.batch_size, num_workers=opt.num_workers)
+            n_cls = 8
     else:
         raise NotImplementedError(opt.dataset)
 
