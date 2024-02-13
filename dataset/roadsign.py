@@ -31,6 +31,9 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
     test_set = datasets.ImageFolder(root=data_folder + '/test', transform=transform)
     test_loader = DataLoader(test_set, batch_size=int(batch_size/2), shuffle=False, num_workers=int(num_workers/2))
 
+    print(f'Train: {len(train_set)}')
+    print(f'Test: {len(test_set)}\n')
+
     return train_loader, test_loader
 
 
@@ -148,5 +151,8 @@ def get_road_signs_contrastive_dataloaders(batch_size=128, num_workers=8, k=4096
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
+    
+    print(f'Train: {len(train_set)}')
+    print(f'Test: {len(test_set)}\n')
 
     return train_loader, test_loader
