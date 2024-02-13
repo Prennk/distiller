@@ -235,6 +235,8 @@ if __name__ == "__main__":
 
     x = torch.randn(2, 3, 32, 32)
     net = CSPDarkNet53Backbone()
+    print(net)
+    print()
 
     feats, logit = net(x, is_feat=True)
     for f in feats:
