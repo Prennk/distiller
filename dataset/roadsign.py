@@ -20,6 +20,7 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
 
     transform = transforms.Compose([
         transforms.Resize((416, 416)),
+        transforms.RandomCrop(416, pad_if_needed=True),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
@@ -116,6 +117,7 @@ def get_road_signs_contrastive_dataloaders(batch_size=128, num_workers=8, k=4096
 
     train_transform = transforms.Compose([
         transforms.Resize((416, 416)),
+        transforms.RandomCrop(416, pad_if_needed=True),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
