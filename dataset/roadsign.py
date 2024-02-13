@@ -32,8 +32,24 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
     test_set = datasets.ImageFolder(root=data_folder + '/test', transform=transform)
     test_loader = DataLoader(test_set, batch_size=int(batch_size/2), shuffle=False, num_workers=int(num_workers/2))
 
-    print(f'Train: {len(train_set)}')
-    print(f'Test: {len(test_set)}\n')
+    # print(f'Train: {len(train_set)}')
+    # print(f'Test: {len(test_set)}\n')
+   # Menghitung jumlah data untuk setiap label pada set pelatihan
+    train_data_counts = {class_label: 0 for class_label in train_set.classes}
+    for _, label in train_set:
+        train_data_counts[train_set.classes[label]] += 1
+
+    # Menghitung jumlah data untuk setiap label pada set pengujian
+    test_data_counts = {class_label: 0 for class_label in test_set.classes}
+    for _, label in test_set:
+        test_data_counts[test_set.classes[label]] += 1
+
+    print('Train:')
+    for label, count in train_data_counts.items():
+        print(f'Label {label}: {count} data')
+    print('\Test:')
+    for label, count in test_data_counts.items():
+        print(f'Label {label}: {count} data\n')
 
     return train_loader, test_loader
 
