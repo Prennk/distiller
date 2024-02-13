@@ -46,6 +46,8 @@ def parse_option():
     parser.add_argument('--batch_size', type=int, default=64, help='batch_size')
     parser.add_argument('--num_workers', type=int, default=8, help='num of workers to use')
     parser.add_argument('--epochs', type=int, default=240, help='number of training epochs')
+    parser.add_argument('--resume', action='store_true', help='resume train')
+    parser.add_argument('--checkpoint_path', type=str, default='', help='checkpoint path')
     parser.add_argument('--init_epochs', type=int, default=30, help='init training for two-stage methods')
 
     # optimization
@@ -196,6 +198,10 @@ def main():
     model_t = load_teacher(opt.path_t, n_cls)
     model_s = model_dict[opt.model_s](num_classes=n_cls)
 
+    if opt.resume:
+        model_s.load_state_dict(torch.load(opt.checkpoint_path)['model'])
+        current_epoch = torch.load(opt.checkpoint_path)['epoch'] + 1
+
     data = torch.randn(2, 3, 32, 32)
     model_t.eval()
     model_s.eval()
@@ -317,7 +323,7 @@ def main():
     print('teacher accuracy: ', teacher_acc)
 
     # routine
-    for epoch in range(1, opt.epochs + 1):
+    for epoch in range(current_epoch if opt.resume else 1, opt.epochs + 1):
 
         adjust_learning_rate(epoch, opt, optimizer)
         print("==> training...")
@@ -347,6 +353,17 @@ def main():
             save_file = os.path.join(opt.save_folder, '{}_best.pth'.format(opt.model_s))
             print('saving the best model!')
             torch.save(state, save_file)
+
+        # create checkpoint
+        print(f'==> Checkpoint created for epoch {epoch}...')
+        state = {
+            'epoch': epoch,
+            'model': model_s.state_dict(),
+            'accuracy': test_acc,
+            'optimizer': optimizer.state_dict(),
+        }
+        save_file = os.path.join(opt.save_folder, 'checkpoint.pth'.format(epoch=epoch))
+        torch.save(state, save_file)
 
         # regular saving
         if epoch % opt.save_freq == 0:

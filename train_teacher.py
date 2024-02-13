@@ -172,6 +172,18 @@ def main():
             print('saving the best model!')
             torch.save(state, save_file)
 
+
+        # create checkpoint
+        print(f'==> Checkpoint created for epoch {epoch}...')
+        state = {
+            'epoch': epoch,
+            'model': model.state_dict(),
+            'accuracy': test_acc,
+            'optimizer': optimizer.state_dict(),
+        }
+        save_file = os.path.join(opt.save_folder, 'checkpoint.pth'.format(epoch=epoch))
+        torch.save(state, save_file)
+
         # regular saving
         if epoch % opt.save_freq == 0:
             print('==> Saving...')
