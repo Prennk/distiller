@@ -8,7 +8,7 @@ def get_data_folder():
     """
     return path ke folder dataset
     """
-    return 'dataset/folder/road signs categories classification'
+    return 'dataset/road signs categories classification'
 
 # dataloader biasa
 def get_road_sign_dataloaders(batch_size=128, num_workers=8):
