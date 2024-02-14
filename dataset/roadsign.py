@@ -20,7 +20,7 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
     print(f'Resize to {res}...')
     data_folder = get_data_folder()
 
-    transform = transforms.Compose([
+    train_transform = transforms.Compose([
         transforms.Resize(res),
         transforms.RandomCrop(res),
         transforms.RandomHorizontalFlip(),
@@ -30,10 +30,16 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
 
-    train_set = datasets.ImageFolder(root=data_folder + '/train', transform=transform)
+    test_transform = transforms.Compose([
+        transforms.Resize(res),
+        transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    ])
+
+    train_set = datasets.ImageFolder(root=data_folder + '/train', transform=train_transform)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-    test_set = datasets.ImageFolder(root=data_folder + '/test', transform=transform)
+    test_set = datasets.ImageFolder(root=data_folder + '/test', transform=test_transform)
     test_loader = DataLoader(test_set, batch_size=int(batch_size/2), shuffle=False, num_workers=int(num_workers/2))
 
     print(f'Train: {len(train_set)}')
