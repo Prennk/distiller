@@ -58,7 +58,7 @@ def parse_option():
                                  'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
                                  'efficientnet_b0'])
 
-    parser.add_argument('-t', '--trial', type=int, default=0, help='the experiment id')
+    parser.add_argument('-id', '--note', type=str, default='expertiment 1', help='the experiment note')
 
     opt = parser.parse_args()
     
@@ -80,11 +80,11 @@ def parse_option():
         opt.lr_decay_epochs.append(int(it))
 
     if opt.upsample:
-        opt.model_name = '{}_UPSAMPLE_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
-                                                                    opt.weight_decay, opt.trial)
+        opt.model_name = '{}_UPSAMPLE_{}_lr_{}_decay_{}_note_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+                                                                    opt.weight_decay, opt.note)
     else:
-        opt.model_name = '{}_{}_lr_{}_decay_{}_trial_{}'.format(opt.model, opt.dataset, opt.learning_rate,
-                                                                    opt.weight_decay, opt.trial)
+        opt.model_name = '{}_{}_lr_{}_decay_{}_note_{}'.format(opt.model, opt.dataset, opt.learning_rate,
+                                                                    opt.weight_decay, opt.note)
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)
     if not os.path.isdir(opt.tb_folder):
