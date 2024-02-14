@@ -21,11 +21,9 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
-        transforms.Resize(res),
         transforms.RandomCrop(res),
         transforms.RandomHorizontalFlip(),
-        transforms.ColorJitter(brightness=.5, hue=.3),
-        transforms.RandomAffine(degrees=(30, 70), translate=(0.1, 0.3), scale=(0.5, 0.75)),
+        transforms.Resize(res),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
