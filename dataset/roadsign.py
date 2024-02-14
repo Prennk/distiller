@@ -25,13 +25,13 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
         transforms.RandomCrop(res),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
 
     test_transform = transforms.Compose([
         transforms.Resize(res),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
 
     train_set = datasets.ImageFolder(root=data_folder + '/train', transform=train_transform)
