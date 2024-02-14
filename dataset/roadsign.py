@@ -15,12 +15,14 @@ def get_road_sign_dataloaders(batch_size=128, num_workers=8):
     """
     road signs categories classification
     """
+    res = 416
     print('Creating dataloader from Road Sign Categories Classification...')
+    print(f'Resize to {res}...')
     data_folder = get_data_folder()
 
     transform = transforms.Compose([
-        transforms.Resize((416, 416)),
-        transforms.RandomCrop((416, 416)),
+        transforms.Resize(res),
+        transforms.RandomCrop(res),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=.5, hue=.3),
         transforms.RandomAffine(degrees=(30, 70), translate=(0.1, 0.3), scale=(0.5, 0.75)),
