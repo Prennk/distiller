@@ -120,8 +120,12 @@ def main():
     model = model_dict[opt.model](num_classes=n_cls)
 
     if opt.resume:
+        print(f"Loading checkpoint from {str(opt.checkpoint_path)}...")
+
         model.load_state_dict(torch.load(opt.checkpoint_path)['model'])
         current_epoch = torch.load(opt.checkpoint_path)['epoch'] + 1
+
+        print(f"Checkpoint loaded")
 
     # optimizer
     optimizer = optim.SGD(model.parameters(),
