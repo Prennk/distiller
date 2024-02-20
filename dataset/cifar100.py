@@ -6,6 +6,7 @@ import numpy as np
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from PIL import Image
+import matplotlib.pyplot as plt
 
 """
 mean = {
@@ -147,8 +148,14 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     print(f"test: {len(test_set)}")
 
     sample_image, _ = train_set[0]
-    sample_image = transforms.ToPILImage()(sample_image)
-    print(f"Resolution of one sample image: {sample_image.size}")
+    sample_image_pil = transforms.ToPILImage()(sample_image)
+    print(f"Resolution of one sample image: {sample_image_pil.size}")
+    plt.figure()
+    plt.imshow(sample_image_pil)
+    plt.title('Sample Image')
+    plt.axis('off')
+    plt.text(10, 10, f'Resolution: {sample_image_pil.size}', color='white', fontsize=10, verticalalignment='top')
+    plt.show()
 
     if is_instance:
         return train_loader, test_loader, n_data
