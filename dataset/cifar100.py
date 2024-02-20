@@ -111,6 +111,10 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     cifar 100
     """
     res = (416, 416)
+    left_padding = (res[0] - 32) // 2
+    top_padding = (res[1] - 32) // 2
+    right_padding = res[0] - 32 - left_padding
+    bottom_padding = res[1] - 32 - top_padding
 
     print('Creating dataloader from CIFAR100...')
 
@@ -118,7 +122,7 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
 
     train_transform = transforms.Compose([
         # transforms.Resize(res),
-        transforms.Pad(padding=(0, 0, res[0] - 32, res[1] - 32), fill=0), 
+        transforms.Pad(padding=(left_padding, top_padding, right_padding, bottom_padding), fill=0), 
         # transforms.RandomCrop(res),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
