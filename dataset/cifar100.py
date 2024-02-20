@@ -88,6 +88,18 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
+    
+    print(f"Train: {len(train_set)}")
+    print(f"test: {len(test_set)}")
+
+    sample_image, _ = train_set[0]
+    sample_image_pil = transforms.ToPILImage()(sample_image)
+    plt.figure()
+    plt.imshow(sample_image_pil)
+    plt.title('Sample Image')
+    plt.axis('off')
+    plt.text(10, 10, f'Resolution: {sample_image_pil.size}', color='white', fontsize=10, verticalalignment='top')
+    plt.show()
 
     if is_instance:
         return train_loader, test_loader, n_data
