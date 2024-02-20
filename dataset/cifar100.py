@@ -98,7 +98,7 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     """
     cifar 100
     """
-    res = 416
+    res = (416, 416)
 
     print('Creating dataloader from CIFAR100...')
 
@@ -149,7 +149,6 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
 
     sample_image, _ = train_set[0]
     sample_image_pil = transforms.ToPILImage()(sample_image)
-    print(f"Resolution of one sample image: {sample_image_pil.size}")
     plt.figure()
     plt.imshow(sample_image_pil)
     plt.title('Sample Image')
