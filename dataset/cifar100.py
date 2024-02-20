@@ -147,6 +147,7 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     print(f"test: {len(test_set)}")
 
     sample_image, _ = train_set[0]
+    sample_image = transforms.ToPILImage()(sample_image)
     print(f"Resolution of one sample image: {sample_image.size}")
 
     if is_instance:
