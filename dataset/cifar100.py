@@ -100,7 +100,6 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     res = 416
 
     print('Creating dataloader from CIFAR100...')
-    print(f'Resize to {res}...')
 
     data_folder = get_data_folder()
 
@@ -146,6 +145,10 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
 
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
+
+    sample_image, _ = train_set[0]
+    print(f"Resolution of one sample image: {sample_image.size}")
+
     if is_instance:
         return train_loader, test_loader, n_data
     else:
