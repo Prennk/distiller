@@ -122,7 +122,7 @@ def main():
     if opt.resume:
         print(f"Loading checkpoint from {str(opt.checkpoint_path)}...")
 
-        model.load_state_dict(torch.load(opt.checkpoint_path)['model'])
+        model.load_state_dict(torch.load(str(opt.checkpoint_path))['model'])
         current_epoch = torch.load(opt.checkpoint_path)['epoch'] + 1
 
         print(f"Checkpoint loaded")
