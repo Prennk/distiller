@@ -117,14 +117,16 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
-        transforms.Resize(res),
+        # transforms.Resize(res),
         transforms.RandomCrop(res),
         transforms.RandomHorizontalFlip(),
+        transforms.Pad(padding=(0, 0, res[0] - 32, res[1] - 32), fill=0), 
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
     test_transform = transforms.Compose([
-        transforms.Resize(res),
+        # transforms.Resize(res),
+        transforms.Pad(padding=(0, 0, res[0] - 32, res[1] - 32), fill=0), 
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
     ])
