@@ -152,10 +152,10 @@ def main():
         print("Matched keys:", matched_keys)
         print("Unmatched keys:", unmatched_keys)
 
-    # Load only matched keys
-    model.load_state_dict(pretrained_dict, strict=False)
+        # Load only matched keys
+        model.load_state_dict(pretrained_dict, strict=False)
 
-    print("Only matched keys are loaded")
+        print("Only matched keys are loaded")
 
 
     if opt.resume:
