@@ -149,7 +149,9 @@ def main():
             else:
                 unmatched_keys.append(k)
 
+        print("Count Matched keys:", len(matched_keys))
         print("Matched keys:", matched_keys)
+        print("\nCount Unmatched keys:", len(unmatched_keys))
         print("Unmatched keys:", unmatched_keys)
 
         # Load only matched keys
