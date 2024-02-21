@@ -122,7 +122,7 @@ def main():
     model = model_dict[opt.model](num_classes=n_cls)
 
     if opt.pretrained == True & opt.resume == False:
-        print("Loading pretrained model...")
+        print(f"Loading pretrained model from {str(opt.pretrained)} ...")
         pretrained_model = torch.load(opt.pretrained_path)
         pretrained_dict = pretrained_model['model']
 
@@ -159,7 +159,7 @@ def main():
 
 
     if opt.resume:
-        print(f"Loading checkpoint from {str(opt.checkpoint_path)}...")
+        print(f"Loading checkpoint from {str(opt.checkpoint_path)} ...")
 
         model.load_state_dict(torch.load(str(opt.checkpoint_path))['model'])
         current_epoch = torch.load(opt.checkpoint_path)['epoch'] + 1
