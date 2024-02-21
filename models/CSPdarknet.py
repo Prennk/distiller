@@ -202,25 +202,25 @@ class CSPDarkNet53Backbone(nn.Module):
         self.backbone = darknet53(num_classes=num_classes, pretrained=False)
 
     def forward(self, x, is_feat=False, preact=False):
-        x = self.backbone.model.conv1(x)
+        x = self.backbone.conv1(x)
         f0 = x
 
-        x = self.backbone.model.stages[0](x)
+        x = self.backbone.stages[0](x)
         f1 = x
 
-        x = self.backbone.model.stages[1](x)
+        x = self.backbone.stages[1](x)
         f2 = x
 
-        x = self.backbone.model.stages[2](x)
+        x = self.backbone.stages[2](x)
         f3 = x
 
-        x = self.backbone.model.stages[3](x)
+        x = self.backbone.stages[3](x)
         f4 = x
 
-        x = self.backbone.model.stages[4](x)
+        x = self.backbone.stages[4](x)
         f5 = x
 
-        x = self.backbone.model.classifier(x)
+        x = self.backbone.classifier(x)
 
         if is_feat:
             return [f0, f1, f2, f3, f4, f5], x
