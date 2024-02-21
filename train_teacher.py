@@ -149,8 +149,8 @@ def main():
             else:
                 unmatched_keys.append(k)
 
-    print("Matched keys:", matched_keys)
-    print("Unmatched keys:", unmatched_keys)
+        print("Matched keys:", matched_keys)
+        print("Unmatched keys:", unmatched_keys)
 
     # Load only matched keys
     model.load_state_dict(pretrained_dict, strict=False)
