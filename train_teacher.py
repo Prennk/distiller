@@ -122,7 +122,7 @@ def main():
     model = model_dict[opt.model](num_classes=n_cls)
 
     if opt.pretrained and not opt.resume:
-        print(f"Loading pretrained model from {str(opt.pretrained)} ...")
+        print(f"Loading pretrained model from {str(opt.pretrained_path)} ...")
         pretrained_model = torch.load(opt.pretrained_path)
         pretrained_dict = pretrained_model['model']
 
