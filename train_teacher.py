@@ -131,14 +131,6 @@ def main():
         unmatched_keys = []
 
         for k, v in pretrained_model_state_dict.items():
-            print(k)
-            print()
-
-        for k, v in model_state_dict.items():
-            print(k)
-            print()
-
-        for k, v in pretrained_model_state_dict.items():
             if k in model_state_dict:
                 matched_keys.append(k)
             else:
