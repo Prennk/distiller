@@ -121,7 +121,7 @@ def main():
     # model
     model = model_dict[opt.model](num_classes=n_cls)
 
-    if opt.pretrained == True & opt.resume == False:
+    if opt.pretrained and not opt.resume:
         print(f"Loading pretrained model from {str(opt.pretrained)} ...")
         pretrained_model = torch.load(opt.pretrained_path)
         pretrained_dict = pretrained_model['model']
