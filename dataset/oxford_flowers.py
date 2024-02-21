@@ -27,18 +27,28 @@ def get_data_folder():
 
 class Flowers102(Dataset):
     """Custom dataset class for 102 Flowers Dataset."""
-    def __init__(self, root_folder, labels, transform=None):
+    def __init__(self, root_folder, labels, transform=None, train=True):
         self.root_folder = root_folder
         self.labels = labels
         self.transform = transform
+        self.train = train
+        if self.train:
+            self.total_samples = int(len(self.labels) * 0.8)
+        else:
+            self.total_samples = len(self.labels) - int(len(self.labels) * 0.8)
 
     def __len__(self):
-        return len(self.labels)
+        return self.total_samples
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.root_folder, f'image_{idx+1:05d}.jpg')  # Gambar-gambar dinamai seperti "image_00001.jpg", "image_00002.jpg", dll.
+        if self.train:
+            img_path = os.path.join(self.root_folder, f'image_{idx+1:05d}.jpg')
+            label = self.labels[idx]
+        else:
+            img_path = os.path.join(self.root_folder, f'image_{idx+self.total_samples+1:05d}.jpg')
+            label = self.labels[idx+self.total_samples]
+
         img = Image.open(img_path).convert('RGB')
-        label = self.labels[idx]
 
         if self.transform:
             img = self.transform(img)
@@ -76,7 +86,8 @@ def get_flowers102_dataloader(batch_size=128, num_workers=8):
 
     train_set = Flowers102(root_folder=os.path.join(data_folder, 'jpg'),
                            labels=labels,
-                           transform=train_transform)
+                           transform=train_transform,
+                           train=True)
     train_loader = DataLoader(train_set,
                               batch_size=batch_size,
                               shuffle=True,
@@ -84,7 +95,8 @@ def get_flowers102_dataloader(batch_size=128, num_workers=8):
 
     test_set = Flowers102(root_folder=os.path.join(data_folder, 'jpg'),
                           labels=labels,
-                          transform=test_transform)
+                          transform=test_transform,
+                          train=False)
     test_loader = DataLoader(test_set,
                              batch_size=int(batch_size/2),
                              shuffle=False,
