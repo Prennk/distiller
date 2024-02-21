@@ -187,19 +187,19 @@ def darknet53(num_classes=1000, pretrained=False):
     return model
 
 # self.backbone.model <--- buat key .model
-class CSPDarkNet53Model(nn.Module):
-    def __init__(self, num_classes=1000, pretrained=False):
-        super(CSPDarkNet53Model, self).__init__()
-        self.model = darknet53(num_classes=num_classes, pretrained=pretrained)
+# class CSPDarkNet53Model(nn.Module):
+#     def __init__(self, num_classes=1000, pretrained=False):
+#         super(CSPDarkNet53Model, self).__init__()
+#         self.model = darknet53(num_classes=num_classes, pretrained=pretrained)
 
-    def forward(self, x, is_feat=False, preact=False):
-        return self.model(x)
+#     def forward(self, x, is_feat=False, preact=False):
+#         return self.model(x)
 
 # self.backbone.model <--- buat key .backbone
 class CSPDarkNet53Backbone(nn.Module):
     def __init__(self, num_classes=1000):
         super(CSPDarkNet53Backbone, self).__init__()
-        self.backbone = CSPDarkNet53Model(num_classes=num_classes, pretrained=False)
+        self.backbone = darknet53(num_classes=num_classes, pretrained=False)
 
     def forward(self, x, is_feat=False, preact=False):
         x = self.backbone.model.conv1(x)
