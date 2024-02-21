@@ -126,16 +126,16 @@ def main():
         pretrained_model = torch.load(opt.pretrained_path)
         pretrained_dict = pretrained_model['model']
 
-        model_dict = model.state_dict()
+        model_dictionary = model.state_dict()
 
         # Filter out unnecessary keys
-        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dictionary}
 
         # Overwrite entries in the existing state dict
-        model_dict.update(pretrained_dict)
+        model_dictionary.update(pretrained_dict)
 
         # Load the new state dict
-        model.load_state_dict(model_dict)
+        model.load_state_dict(model_dictionary)
 
         print("Pretrained model loaded successfully")
 
@@ -144,7 +144,7 @@ def main():
         unmatched_keys = []
 
         for k, v in pretrained_dict.items():
-            if k in model_dict:
+            if k in model_dictionary:
                 matched_keys.append(k)
             else:
                 unmatched_keys.append(k)
