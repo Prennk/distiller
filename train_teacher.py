@@ -35,6 +35,8 @@ def parse_option():
     parser.add_argument('--epochs', type=int, default=240, help='number of training epochs')
     parser.add_argument('--resume', action='store_true', help='resume train')
     parser.add_argument('--checkpoint_path', type=str, default='', help='checkpoint path')
+    parser.add_argument('--pretrained', action='store_true', help='pretrained')
+    parser.add_argument('--pretrained_path', type=str, default='', help='pretrained path')
 
     # optimization
     parser.add_argument('--learning_rate', type=float, default=0.05, help='learning rate')
@@ -118,6 +120,43 @@ def main():
 
     # model
     model = model_dict[opt.model](num_classes=n_cls)
+
+    if opt.pretrained == True & opt.resume == False:
+        print("Loading pretrained model...")
+        pretrained_model = torch.load(opt.pretrained_path)
+        pretrained_dict = pretrained_model['model']
+
+        model_dict = model.state_dict()
+
+        # Filter out unnecessary keys
+        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+
+        # Overwrite entries in the existing state dict
+        model_dict.update(pretrained_dict)
+
+        # Load the new state dict
+        model.load_state_dict(model_dict)
+
+        print("Pretrained model loaded successfully")
+
+        # Check which keys are matched and which are not
+        matched_keys = []
+        unmatched_keys = []
+
+        for k, v in pretrained_dict.items():
+            if k in model_dict:
+                matched_keys.append(k)
+            else:
+                unmatched_keys.append(k)
+
+    print("Matched keys:", matched_keys)
+    print("Unmatched keys:", unmatched_keys)
+
+    # Load only matched keys
+    model.load_state_dict(pretrained_dict, strict=False)
+
+    print("Only matched keys are loaded")
+
 
     if opt.resume:
         print(f"Loading checkpoint from {str(opt.checkpoint_path)}...")
