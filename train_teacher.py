@@ -123,28 +123,15 @@ def main():
 
     if opt.pretrained and not opt.resume:
         print(f"Loading pretrained model from {str(opt.pretrained_path)} ...")
-        pretrained_model = torch.load(opt.pretrained_path)
-        pretrained_dict = pretrained_model
-
-        model_dictionary = model.state_dict()
-
-        # Filter out unnecessary keys
-        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dictionary}
-
-        # Overwrite entries in the existing state dict
-        model_dictionary.update(pretrained_dict)
-
-        # Load the new state dict
-        model.load_state_dict(model_dictionary)
-
-        print("Pretrained model loaded successfully")
+        pretrained_model_state_dict = torch.load(opt.pretrained_path)
+        model_state_dict = model.state_dict()
 
         # Check which keys are matched and which are not
         matched_keys = []
         unmatched_keys = []
 
-        for k, v in pretrained_dict.items():
-            if k in model_dictionary:
+        for k, v in pretrained_model_state_dict.items():
+            if k in model_state_dict:
                 matched_keys.append(k)
             else:
                 unmatched_keys.append(k)
@@ -155,9 +142,10 @@ def main():
         print("Unmatched keys:", unmatched_keys)
 
         # Load only matched keys
-        model.load_state_dict(pretrained_dict, strict=False)
+        model.load_state_dict(pretrained_model_state_dict, strict=False)
 
         print("Only matched keys are loaded")
+        print("Pretrained model loaded successfully")
 
 
     if opt.resume:
