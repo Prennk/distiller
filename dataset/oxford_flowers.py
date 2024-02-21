@@ -2,6 +2,7 @@ import os
 import socket
 import numpy as np
 from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 from PIL import Image
 import scipy.io as sio
@@ -24,25 +25,38 @@ def get_data_folder():
 
     return data_folder
 
-class Flowers102(datasets.ImageFolder):
+class Flowers102(Dataset):
     """Custom dataset class for 102 Flowers Dataset."""
-    def __init__(self, root, labels, transform=None):
-        super().__init__(root, transform=transform)
-        self.targets = labels
+    def __init__(self, root_folder, labels, transform=None):
+        self.root_folder = root_folder
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        img_path = os.path.join(self.root_folder, f'image_{idx+1:05d}.jpg')  # Gambar-gambar dinamai seperti "image_00001.jpg", "image_00002.jpg", dll.
+        img = Image.open(img_path).convert('RGB')
+        label = self.labels[idx]
+
+        if self.transform:
+            img = self.transform(img)
+
+        return img, label
 
 def get_flowers102_dataloader(batch_size=128, num_workers=8):
     print('Creating dataloader from 102flowers...')
 
-    data_folder = get_data_folder()
+    data_folder = './dataset/102flowers'
+    # Read labels
+    mat_file = os.path.join(data_folder, 'imagelabels.mat')
+    labels = read_labels(mat_file)
 
     # Extract images if not already extracted
     tgz_file = os.path.join(data_folder, '102flowers.tgz')
     if not os.path.exists(os.path.join(data_folder, 'jpg')):
         extract_images(tgz_file, data_folder)
-
-    # Read labels
-    mat_file = os.path.join(data_folder, 'imagelabels.mat')
-    labels = read_labels(mat_file)
 
     resolution = (416, 416)
 
@@ -60,7 +74,7 @@ def get_flowers102_dataloader(batch_size=128, num_workers=8):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
 
-    train_set = Flowers102(root=os.path.join(data_folder, 'jpg'),
+    train_set = Flowers102(root_folder=os.path.join(data_folder, 'jpg'),
                            labels=labels,
                            transform=train_transform)
     train_loader = DataLoader(train_set,
@@ -68,7 +82,7 @@ def get_flowers102_dataloader(batch_size=128, num_workers=8):
                               shuffle=True,
                               num_workers=num_workers)
 
-    test_set = Flowers102(root=os.path.join(data_folder, 'jpg'),
+    test_set = Flowers102(root_folder=os.path.join(data_folder, 'jpg'),
                           labels=labels,
                           transform=test_transform)
     test_loader = DataLoader(test_set,
