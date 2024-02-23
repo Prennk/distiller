@@ -144,6 +144,7 @@ def get_teacher_name(model_path):
         print(segments[0] + '_' + segments[1])
         return segments[0] + '_' + segments[1]
     else:
+        print(segments[0] + '_' + segments[1] + '_' + segments[2])
         return segments[0] + '_' + segments[1] + '_' + segments[2]
 
 
