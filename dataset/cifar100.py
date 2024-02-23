@@ -86,7 +86,7 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
-    
+
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
 
@@ -121,10 +121,10 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
         num_classes = 100
         if self.train:
             num_samples = len(self.data)
-            label = self.train_labels
+            label = self.targets
         else:
             num_samples = len(self.data)
-            label = self.test_labels
+            label = self.targets
 
         self.cls_positive = [[] for i in range(num_classes)]
         for i in range(num_samples):
@@ -150,9 +150,9 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
     def __getitem__(self, index):
         if self.train:
-            img, target = self.data[index], self.train_labels[index]
+            img, target = self.data[index], self.targets[index]
         else:
-            img, target = self.data[index], self.test_labels[index]
+            img, target = self.data[index], self.targets[index]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
@@ -223,7 +223,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
-
+    
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
 
