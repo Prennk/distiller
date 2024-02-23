@@ -114,7 +114,7 @@ def parse_option():
     for it in iterations:
         opt.lr_decay_epochs.append(int(it))
 
-    # opt.model_t = get_teacher_name(opt.path_t)
+    opt.model_t = get_teacher_name(opt.path_t)
 
     if opt.upsample:
         opt.model_name = 'S:{}_T:{}_UPSAMPLE_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
