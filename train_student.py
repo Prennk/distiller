@@ -21,6 +21,7 @@ from models.util import Embed, ConvReg, LinearEmbed
 from models.util import Connector, Translator, Paraphraser
 
 from dataset.cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
+from dataset.cifar100 import get_upsampled_cifar100_dataloaders, get_upsampled_cifar100_dataloaders_sample
 from dataset.roadsign import get_road_sign_dataloaders, get_road_signs_contrastive_dataloaders
 
 from helper.util import adjust_learning_rate
@@ -57,7 +58,7 @@ def parse_option():
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 
     # dataset
-    parser.add_argument('--dataset', type=str, default='None', choices=['cifar100', 'road_sign'], help='dataset')
+    parser.add_argument('--dataset', type=str, default='cifar100', choices=['cifar100', 'road_sign'], help='dataset')
     parser.add_argument('--upsample', action='store_true', help='upsample 416x416')
 
     # model
@@ -113,7 +114,7 @@ def parse_option():
     for it in iterations:
         opt.lr_decay_epochs.append(int(it))
 
-    opt.model_t = get_teacher_name(opt.path_t)
+    # opt.model_t = get_teacher_name(opt.path_t)
 
     if opt.upsample:
         opt.model_name = 'S:{}_T:{}_UPSAMPLE_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
@@ -141,7 +142,6 @@ def get_teacher_name(model_path):
         return segments[0]
     else:
         return segments[0] + '_' + segments[1] + '_' + segments[2]
-    # return 'cspdarknet53_backbone'
 
 
 def load_teacher(model_path, n_cls):
