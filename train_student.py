@@ -113,8 +113,7 @@ def parse_option():
     for it in iterations:
         opt.lr_decay_epochs.append(int(it))
 
-    # opt.model_t = get_teacher_name(opt.path_t)
-    opt.model_t = 'cspdarknet53_backbone'
+    opt.model_t = get_teacher_name(opt.path_t)
 
     if opt.upsample:
         opt.model_name = 'S:{}_T:{}_UPSAMPLE_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
@@ -138,10 +137,11 @@ def parse_option():
 def get_teacher_name(model_path):
     """parse teacher name"""
     segments = model_path.split('/')[-2].split('_')
-    if segments[0] != 'wrn':
-        return segments[0]
-    else:
-        return segments[0] + '_' + segments[1] + '_' + segments[2]
+    # if segments[0] != 'wrn':
+    #     return segments[0]
+    # else:
+    #     return segments[0] + '_' + segments[1] + '_' + segments[2]
+    return 'cspdarknet53_backbone'
 
 
 def load_teacher(model_path, n_cls):
