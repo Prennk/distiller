@@ -40,8 +40,8 @@ class ContrastMemory(nn.Module):
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         print('weight_v1:', weight_v1.shape)
         print('v2:', v2.shape)
-        print('batchSize:', batchSize.shape)
-        print('inputSize:', inputSize.shape)
+        print('batchSize:', batchSize)
+        print('inputSize:', inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
         # sample
