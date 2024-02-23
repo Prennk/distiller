@@ -138,6 +138,9 @@ def parse_option():
 def get_teacher_name(model_path):
     """parse teacher name"""
     segments = model_path.split('/')[-2].split('_')
+    print(segments[0])
+    print(segments[1])
+    print(segments[2])
     if segments[0] != 'wrn':
         return segments[0]
     elif segments[1] == 'backbone':
