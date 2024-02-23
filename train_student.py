@@ -142,7 +142,7 @@ def get_teacher_name(model_path):
     if segments[0] != 'wrn':
         print(segments[0])
         return segments[0]
-    elif segments[1] == 'backbone':
+    elif segments[0] == 'cspdarknet53' and segments[1] == 'backbone':
         print(segments[0] + '_' + segments[1])
         return segments[0] + '_' + segments[1]
     else:
