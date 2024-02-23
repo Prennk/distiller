@@ -6,7 +6,6 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from PIL import Image
-import matplotlib.pyplot as plt
 
 """
 mean = {
@@ -49,7 +48,7 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
     """
     cifar 100
     """
-    print('Creating dataloader...')
+    print("Creating dataloader...")
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
@@ -121,10 +120,10 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
         num_classes = 100
         if self.train:
-            num_samples = len(self.train_data)
+            num_samples = len(self.data)
             label = self.train_labels
         else:
-            num_samples = len(self.test_data)
+            num_samples = len(self.data)
             label = self.test_labels
 
         self.cls_positive = [[] for i in range(num_classes)]
@@ -151,9 +150,9 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
     def __getitem__(self, index):
         if self.train:
-            img, target = self.train_data[index], self.train_labels[index]
+            img, target = self.data[index], self.train_labels[index]
         else:
-            img, target = self.test_data[index], self.test_labels[index]
+            img, target = self.data[index], self.test_labels[index]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
@@ -188,7 +187,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     """
     cifar 100
     """
-    print('Creating samples for contrastive...')
+    print("Creating samples for contrastive...")
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
@@ -224,7 +223,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
                              batch_size=int(batch_size/2),
                              shuffle=False,
                              num_workers=int(num_workers/2))
-    
+
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
 
