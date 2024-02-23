@@ -259,6 +259,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     """
     cifar 100
     """
+    print('Creating samples for contrastive...')
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
