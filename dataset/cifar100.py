@@ -3,9 +3,10 @@ from __future__ import print_function
 import os
 import socket
 import numpy as np
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 from PIL import Image
+import matplotlib.pyplot as plt
 
 """
 mean = {
@@ -48,7 +49,6 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
     """
     cifar 100
     """
-    print("Creating dataloader...")
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
@@ -73,6 +73,7 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
                                       download=True,
                                       train=True,
                                       transform=train_transform)
+
     train_loader = DataLoader(train_set,
                               batch_size=batch_size,
                               shuffle=True,
@@ -82,6 +83,74 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
                                  download=True,
                                  train=False,
                                  transform=test_transform)
+
+    test_loader = DataLoader(test_set,
+                             batch_size=int(batch_size/2),
+                             shuffle=False,
+                             num_workers=int(num_workers/2))
+    
+    print(f"Train: {len(train_set)}")
+    print(f"test: {len(test_set)}")
+
+    sample_image, _ = train_set[0]
+    sample_image_pil = transforms.ToPILImage()(sample_image)
+    plt.figure()
+    plt.imshow(sample_image_pil)
+    plt.title('Sample Image')
+    plt.axis('off')
+    plt.text(10, 10, f'Resolution: {sample_image_pil.size}', color='white', fontsize=10, verticalalignment='top')
+    plt.show()
+
+    if is_instance:
+        return train_loader, test_loader, n_data
+    else:
+        return train_loader, test_loader
+
+def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=False):
+    """
+    cifar 100
+    """
+    res = (416, 416)
+
+    print('Creating dataloader from CIFAR100...')
+
+    data_folder = get_data_folder()
+
+    train_transform = transforms.Compose([
+        transforms.Resize(res),
+        transforms.RandomCrop(res),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+    ])
+    test_transform = transforms.Compose([
+        transforms.Resize(res),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+    ])
+
+    if is_instance:
+        train_set = CIFAR100Instance(root=data_folder,
+                                     download=True,
+                                     train=True,
+                                     transform=train_transform)
+        n_data = len(train_set)
+    else:
+        train_set = datasets.CIFAR100(root=data_folder,
+                                    download=True,
+                                    train=True,
+                                    transform=train_transform)
+
+    train_loader = DataLoader(train_set,
+                              batch_size=batch_size,
+                              shuffle=True,
+                              num_workers=num_workers)
+
+    test_set = datasets.CIFAR100(root=data_folder,
+                                download=True,
+                                train=False,
+                                transform=test_transform)
+
     test_loader = DataLoader(test_set,
                              batch_size=int(batch_size/2),
                              shuffle=False,
@@ -104,7 +173,6 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
     else:
         return train_loader, test_loader
 
-
 class CIFAR100InstanceSample(datasets.CIFAR100):
     """
     CIFAR100Instance+Sample Dataset
@@ -122,9 +190,13 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
         if self.train:
             num_samples = len(self.data)
             label = self.targets
+            # num_samples = 3000
+            # label = self.targets[:num_samples]
         else:
             num_samples = len(self.data)
             label = self.targets
+            # num_samples = 600
+            # label = self.targets[-num_samples:]
 
         self.cls_positive = [[] for i in range(num_classes)]
         for i in range(num_samples):
@@ -183,11 +255,10 @@ class CIFAR100InstanceSample(datasets.CIFAR100):
 
 
 def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode='exact',
-                                    is_sample=True, percent=1.0):
+                                    is_sample=True, percent=1.0, use_percent=1.0):
     """
     cifar 100
     """
-    print("Creating samples for contrastive...")
     data_folder = get_data_folder()
 
     train_transform = transforms.Compose([
@@ -209,7 +280,11 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
                                        mode=mode,
                                        is_sample=is_sample,
                                        percent=percent)
+    
+    n_train_data = int(use_percent * len(train_set))
+    train_set = Subset(train_set, range(n_train_data))
     n_data = len(train_set)
+
     train_loader = DataLoader(train_set,
                               batch_size=batch_size,
                               shuffle=True,
@@ -219,6 +294,66 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
                                  download=True,
                                  train=False,
                                  transform=test_transform)
+    
+    n_test_data = int(use_percent * len(test_set))
+    test_set = Subset(test_set, range(n_test_data))
+    
+    test_loader = DataLoader(test_set,
+                             batch_size=int(batch_size/2),
+                             shuffle=False,
+                             num_workers=int(num_workers/2))
+    
+    print(f"Train: {n_train_data}")
+    print(f"test: {n_test_data}")
+
+    return train_loader, test_loader, n_data
+
+def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=4096, mode='exact',
+                                    is_sample=True, percent=1.0, use_percent=0.06):
+    """
+    cifar 100
+    """
+    res = 416
+
+    print('Creating sample for contrastive from CIFAR100...')
+    print(f'Resize to {res}...')
+
+    data_folder = get_data_folder()
+
+    train_transform = transforms.Compose([
+        transforms.Resize(res),
+        transforms.RandomCrop(res),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+    ])
+    test_transform = transforms.Compose([
+        transforms.Resize(res),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+    ])
+
+    train_set = CIFAR100InstanceSample(root=data_folder,
+                                       download=True,
+                                       train=True,
+                                       transform=train_transform,
+                                       k=k,
+                                       mode=mode,
+                                       is_sample=is_sample,
+                                       percent=percent)
+    
+    n_data = len(train_set)
+
+    train_loader = DataLoader(train_set,
+                              batch_size=batch_size,
+                              shuffle=True,
+                              num_workers=num_workers)
+
+    test_set = datasets.CIFAR100(root=data_folder,
+                                 download=True,
+                                 train=False,
+                                 transform=test_transform)
+
     test_loader = DataLoader(test_set,
                              batch_size=int(batch_size/2),
                              shuffle=False,
