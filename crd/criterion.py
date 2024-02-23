@@ -78,25 +78,15 @@ class ContrastLoss(nn.Module):
 
 class Embed(nn.Module):
     """Embedding module"""
-    # def __init__(self, dim_in=1024, dim_out=128):
-    # def __init__(self, dim_in=216320, dim_out=128):
-    def __init__(self, dim_in=173056, dim_out=128):
+    def __init__(self, dim_in=1024, dim_out=128):
         super(Embed, self).__init__()
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
-        if x.shape[1] == 1024:
-            if x.shape[2] != 1:
-                x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
-                x = x.view(x.shape[0], -1)
-                x = self.linear(x)
-                x = self.l2norm(x)
-        else:
-            x = x.view(x.shape[0], -1)
-            x = self.linear(x)
-            x = self.l2norm(x)
-
+        x = x.view(x.shape[0], -1)
+        x = self.linear(x)
+        x = self.l2norm(x)
         return x
 
 
