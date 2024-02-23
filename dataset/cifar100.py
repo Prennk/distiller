@@ -307,7 +307,7 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
 
-    sample_image, _ = train_set[0]
+    sample_image = train_set[0]
     sample_image_pil = transforms.ToPILImage()(sample_image)
     plt.figure()
     plt.imshow(sample_image_pil)
