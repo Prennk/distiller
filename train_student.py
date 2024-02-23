@@ -140,6 +140,8 @@ def get_teacher_name(model_path):
     segments = model_path.split('/')[-2].split('_')
     if segments[0] != 'wrn':
         return segments[0]
+    elif segments[1] == 'backbone':
+        return segments[0] + '_' + segments[1]
     else:
         return segments[0] + '_' + segments[1] + '_' + segments[2]
 

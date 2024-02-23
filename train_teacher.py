@@ -14,6 +14,7 @@ import torch.backends.cudnn as cudnn
 from models import model_dict
 
 from dataset.cifar100 import get_cifar100_dataloaders
+from dataset.cifar100 import get_upsampled_cifar100_dataloaders, get_upsampled_cifar100_dataloaders_sample
 from dataset.roadsign import get_road_sign_dataloaders
 from dataset.oxford_flowers import get_flowers102_dataloader
 
