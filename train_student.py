@@ -21,7 +21,6 @@ from models.util import Embed, ConvReg, LinearEmbed
 from models.util import Connector, Translator, Paraphraser
 
 from dataset.cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
-from dataset.cifar100 import get_upsampled_cifar100_dataloaders, get_upsampled_cifar100_dataloaders_sample
 from dataset.roadsign import get_road_sign_dataloaders, get_road_signs_contrastive_dataloaders
 
 from helper.util import adjust_learning_rate
