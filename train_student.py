@@ -76,7 +76,7 @@ def parse_option():
     parser.add_argument('--distill', type=str, default='kd', choices=['kd', 'hint', 'attention', 'similarity',
                                                                       'correlation', 'vid', 'crd', 'kdsvd', 'fsp',
                                                                       'rkd', 'pkt', 'abound', 'factor', 'nst'])
-    parser.add_argument('--trial', type=str, default='1', help='trial id')
+    parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
 
     parser.add_argument('-r', '--gamma', type=float, default=1, help='weight for classification')
     parser.add_argument('-a', '--alpha', type=float, default=None, help='weight balance for KD')
@@ -118,10 +118,10 @@ def parse_option():
 
     if opt.upsample:
         opt.model_name = 'S:{}_T:{}_UPSAMPLE_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
-                                                                opt.gamma, opt.alpha, opt.beta, opt.trial)
+                                                                opt.gamma, opt.alpha, opt.beta, opt.note)
     else:
         opt.model_name = 'S:{}_T:{}_{}_{}_r:{}_a:{}_b:{}_{}'.format(opt.model_s, opt.model_t, opt.dataset, opt.distill,
-                                                                opt.gamma, opt.alpha, opt.beta, opt.trial)
+                                                                opt.gamma, opt.alpha, opt.beta, opt.note)
 
 
     opt.tb_folder = os.path.join(opt.tb_path, opt.model_name)

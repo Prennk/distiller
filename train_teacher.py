@@ -61,7 +61,7 @@ def parse_option():
                                  'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
                                  'efficientnet_b0'])
 
-    parser.add_argument('-id', '--note', type=str, default='expertiment 1', help='the experiment note')
+    parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
 
     opt = parser.parse_args()
     
