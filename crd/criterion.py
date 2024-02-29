@@ -141,10 +141,9 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
-        print(x.shape)
-        x = x.permute(1, 0, 2)
+        x = x.unsqueeze(0)
         x, _ = self.self_attention(x, x, x)
-        x = x.permute(1, 0, 2)
+        x = x.squeeze(0)
         x = self.linear(x)
         x = self.l2norm(x)
         return x
