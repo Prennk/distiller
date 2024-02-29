@@ -136,7 +136,7 @@ class Embed(nn.Module):
     """Embedding module"""
     def __init__(self, dim_in=1024, dim_out=128):
         super(Embed, self).__init__()
-        self.self_attention = nn.MultiheadAttention(embed_dim=dim_in, num_heads=12)
+        self.self_attention = nn.MultiheadAttention(embed_dim=dim_in, num_heads=16)
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
 
