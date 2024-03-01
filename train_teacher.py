@@ -47,7 +47,7 @@ def parse_option():
     parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 
     # dataset
-    parser.add_argument('--dataset', type=str, default='None', choices=['cifar100', 'road_sign', 'flowers'], help='dataset')
+    parser.add_argument('--dataset', type=str, default='cifar100', choices=['cifar100', 'road_sign', 'flowers'], help='dataset')
     parser.add_argument('--upsample', action='store_true', help='upsample 416x416')
 
     # model
