@@ -139,16 +139,20 @@ class Embed(nn.Module):
         super(Embed, self).__init__()
         self.num_layers = num_layers
         self.num_heads = num_heads
-        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.attention_layers3 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.attention_layers4 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
+        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.attention_layers3 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.attention_layers4 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
         
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
+
+        x = self.linear(x)
+        x = self.l2norm(x)
+
         x = x.unsqueeze(0)
 
         residual = x
@@ -168,8 +172,7 @@ class Embed(nn.Module):
         x += residual
 
         x = x.squeeze(0)
-        x = self.linear(x)
-        x = self.l2norm(x)
+
         return x
 
 
