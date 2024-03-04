@@ -151,27 +151,28 @@ class Embed(nn.Module):
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        print(x)
+        print('view:', x.shape)
 
         x = self.linear(x)
         x = self.l2norm(x)
 
         x = x.unsqueeze(0)
-        print(x)
-        print()
+        print('unsqueeze:', x.shape)
 
-        x, _ = self.attention_layers1(x, x, x)
-        x = self.gelu(x)
-        x = self.norm1(x)
+        # x, _ = self.attention_layers1(x, x, x)
+        # x = self.gelu(x)
+        # x = self.norm1(x)
 
-        x = self.fc(x)
-        x = self.l2norm(x)
+        # x = self.fc(x)
+        # x = self.l2norm(x)
 
-        x, _ = self.attention_layers2(x, x, x)
-        x = self.gelu(x)
-        x = self.norm1(x)
+        # x, _ = self.attention_layers2(x, x, x)
+        # x = self.gelu(x)
+        # x = self.norm1(x)
 
         x = x.squeeze(0)
+        print('squeeze:', x.shape)
+        print()
 
         return x
 
