@@ -163,8 +163,8 @@ class Embed(nn.Module):
     def forward(self, x):
         x = x.view(x.shape[0], -1)
 
-        x = self.linear(x)
-        x = self.l2norm(x)
+        # x = self.linear(x)
+        # x = self.l2norm(x)
 
         x = x.unsqueeze(0)
 
