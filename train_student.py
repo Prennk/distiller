@@ -138,11 +138,11 @@ def parse_option():
 def get_teacher_name(model_path):
     """parse teacher name"""
     segments = model_path.split('/')[-2].split('_')
-    if segments[0] != 'wrn':
-        return segments[0]
-    else:
-        return segments[0] + '_' + segments[1] + '_' + segments[2]
-    # return 'cspdarknet53_backbone'
+    # if segments[0] != 'wrn':
+    #     return segments[0]
+    # else:
+    #     return segments[0] + '_' + segments[1] + '_' + segments[2]
+    return 'cspdarknet53_backbone'
 
 
 def load_teacher(model_path, n_cls):
