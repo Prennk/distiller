@@ -157,17 +157,8 @@ class Embed(nn.Module):
 
         residual = x
         x, _ = self.attention_layers1(x, x, x)
-        x += residual
-
-        residual = x
         x, _ = self.attention_layers2(x, x, x)
-        x += residual
-
-        residual = x
         x, _ = self.attention_layers3(x, x, x)
-        x += residual
-
-        residual = x
         x, _ = self.attention_layers4(x, x, x)
         x += residual
 
