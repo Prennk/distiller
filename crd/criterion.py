@@ -143,18 +143,20 @@ class Embed(nn.Module):
         self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
         self.fc = nn.Linear(dim_out, dim_out)
         self.gelu = nn.GELU()
-        self.norm1 = nn.LayerNorm(dim_out)
-        self.norm2 = nn.LayerNorm(dim_out)
+        self.norm1 = nn.LayerNorm(dim_in)
+        self.norm2 = nn.LayerNorm(dim_in)
 
         self.feed_forward1 = nn.Sequential(
-            nn.Linear(dim_out, dim_in),
+            nn.Linear(dim_in, dim_out),
             nn.ReLU(),
-            nn.Linear(dim_in, dim_out)
+            nn.Linear(dim_out, dim_in),
+            nn.LayerNorm(dim_in),
         )
         self.feed_forward2 = nn.Sequential(
-            nn.Linear(dim_out, dim_in),
+            nn.Linear(dim_in, dim_out),
             nn.ReLU(),
-            nn.Linear(dim_in, dim_out)
+            nn.Linear(dim_out, dim_in),
+            nn.LayerNorm(dim_in),
         )
         
         self.linear = nn.Linear(dim_in, dim_out)
@@ -163,28 +165,26 @@ class Embed(nn.Module):
     def forward(self, x):
         x = x.view(x.shape[0], -1)
 
-        # x = self.linear(x)
-        # x = self.l2norm(x)
-
         x = x.unsqueeze(0)
 
         residual = x
         x, _ = self.attention_layers1(x, x, x)
-        x = self.l2norm(x)
+        x = self.norm1(x)
         x += residual
         residual = x
         x = self.feed_forward1(x)
-        x = self.l2norm(x)
         x += residual
 
         residual = x
         x, _ = self.attention_layers2(x, x, x)
-        x = self.l2norm(x)
+        x = self.norm2(x)
         x += residual
         residual = x
         x = self.feed_forward2(x)
-        x = self.l2norm(x)
         x += residual
+
+        x = self.linear(x)
+        x = self.l2norm(x)
 
         x = x.squeeze(0)
 
