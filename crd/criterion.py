@@ -141,6 +141,8 @@ class Embed(nn.Module):
         self.num_heads = num_heads
         self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
         self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
+        self.norm1 = nn.LayerNorm(dim_in)
+        self.norm2 = nn.LayerNorm(dim_in)
 
         self.feed_forward1 = nn.Sequential(
             nn.Linear(dim_in, dim_out),
@@ -180,7 +182,7 @@ class Embed(nn.Module):
         x = self.feed_forward2(x)
         x += residual
         x = x.squeeze(0)
-
+        
         x = self.linear(x)
         x = self.l2norm(x)
 
