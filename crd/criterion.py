@@ -135,10 +135,10 @@ class ContrastNormLoss(nn.Module):
 import torch.nn.functional as F
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, dim_in=1024, dim_out=128):
+    def __init__(self, dim_in=1024, dim_out=128, num_layers=4, num_heads=8):
         super(Embed, self).__init__()
-        num_layers = 4
-        num_heads = 8
+        self.num_layers = num_layers
+        self.num_heads = num_heads
         self.attention_layers = nn.ModuleList([
             nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
             for _ in range(num_layers)
