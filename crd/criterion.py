@@ -145,6 +145,17 @@ class Embed(nn.Module):
         self.gelu = nn.GELU()
         self.norm1 = nn.LayerNorm(dim_out)
         self.norm2 = nn.LayerNorm(dim_out)
+
+        self.feed_forward1 = nn.Sequential(
+            nn.Linear(dim_out, dim_in),
+            nn.ReLU(),
+            nn.Linear(dim_in, dim_out)
+        )
+        self.feed_forward2 = nn.Sequential(
+            nn.Linear(dim_out, dim_in),
+            nn.ReLU(),
+            nn.Linear(dim_in, dim_out)
+        )
         
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
@@ -157,19 +168,19 @@ class Embed(nn.Module):
 
         x = x.unsqueeze(0)
 
-        residual_1 = x
+        residual = x
         x, _ = self.attention_layers1(x, x, x)
         x = self.l2norm(x)
-        x = self.gelu(x)
-        x += residual_1
+        x += residual
+        residual = x
+        x = self.feed_forward1(x) + residual
 
-        residual_2 = x
+        residual = x
         x, _ = self.attention_layers2(x, x, x)
         x = self.l2norm(x)
-        x = self.gelu(x)
-        x += residual_2
-
-        x += residual_1
+        x += residual
+        residual = x
+        x = self.feed_forward2(x) + residual
 
         x = x.squeeze(0)
 
