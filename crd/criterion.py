@@ -143,26 +143,33 @@ class Embed(nn.Module):
         self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
         self.fc = nn.Linear(dim_out, dim_out)
         self.gelu = nn.GELU()
-        self.norm = nn.LayerNorm(dim_out)
+        self.norm1 = nn.LayerNorm(dim_out)
+        self.norm2 = nn.LayerNorm(dim_out)
         
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
+        print(x)
 
         x = self.linear(x)
         x = self.l2norm(x)
 
         x = x.unsqueeze(0)
+        print(x)
+        print()
 
         x, _ = self.attention_layers1(x, x, x)
         x = self.gelu(x)
+        x = self.norm1(x)
+
+        x = self.fc(x)
         x = self.l2norm(x)
 
         x, _ = self.attention_layers2(x, x, x)
         x = self.gelu(x)
-        x = self.l2norm(x)
+        x = self.norm1(x)
 
         x = x.squeeze(0)
 
