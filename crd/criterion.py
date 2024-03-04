@@ -173,14 +173,18 @@ class Embed(nn.Module):
         x = self.l2norm(x)
         x += residual
         residual = x
-        x = self.feed_forward1(x) + residual
+        x = self.feed_forward1(x)
+        x = self.l2norm(x)
+        x += residual
 
         residual = x
         x, _ = self.attention_layers2(x, x, x)
         x = self.l2norm(x)
         x += residual
         residual = x
-        x = self.feed_forward2(x) + residual
+        x = self.feed_forward2(x)
+        x = self.l2norm(x)
+        x += residual
 
         x = x.squeeze(0)
 
