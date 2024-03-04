@@ -141,8 +141,6 @@ class Embed(nn.Module):
         self.num_heads = num_heads
         self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
         self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.attention_layers3 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.attention_layers4 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
         
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
@@ -156,14 +154,6 @@ class Embed(nn.Module):
 
         residual = x
         x, _ = self.attention_layers2(x, x, x)
-        x += residual
-
-        residual = x
-        x, _ = self.attention_layers3(x, x, x)
-        x += residual
-
-        residual = x
-        x, _ = self.attention_layers4(x, x, x)
         x += residual
 
         x = x.squeeze(0)
