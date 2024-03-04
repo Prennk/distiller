@@ -166,7 +166,10 @@ class Embed(nn.Module):
         # x = self.linear(x)
         # x = self.l2norm(x)
 
+        print('asli:', x.shape)
         x = x.unsqueeze(0)
+        print('unsqueeze:', x.shape)
+        print()
 
         residual = x
         x, _ = self.attention_layers1(x, x, x)
