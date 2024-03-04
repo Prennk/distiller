@@ -157,11 +157,11 @@ class Embed(nn.Module):
         x = x.unsqueeze(0)
 
         x, _ = self.attention_layers1(x, x, x)
-        x = F.relu(x)
+        x = self.gelu(x)
         x = self.l2norm(x)
 
         x, _ = self.attention_layers2(x, x, x)
-        x = F.relu(x)
+        x = self.gelu(x)
         x = self.l2norm(x)
 
         x = x.squeeze(0)
