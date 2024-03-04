@@ -146,7 +146,9 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
+        print('x:', x.shape)
         x = x.unsqueeze(0)
+        print('x:', x.shape)
 
         residual = x
         x, _ = self.attention_layers1(x, x, x)
