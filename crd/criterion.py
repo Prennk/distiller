@@ -168,6 +168,8 @@ class Embed(nn.Module):
         x += residual
 
         x = x.squeeze(0)
+        print(x.shape)
+        print()
 
         return x
 
