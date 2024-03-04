@@ -173,8 +173,6 @@ class Embed(nn.Module):
 
         x = x.squeeze(0)
 
-        x = self.fc(x)
-
         return x
 
 
