@@ -148,11 +148,8 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
-        print('x awal:', x.shape)
         x = x.view(x.shape[0], -1)
-        print('x view:', x.shape)
         x = x.unsqueeze(0)
-        print('x unsqueeze:', x.shape)
 
         residual = x
         x, _ = self.attention_layers1(x, x, x)
@@ -171,8 +168,6 @@ class Embed(nn.Module):
         x += residual
 
         x = x.squeeze(0)
-        print('x squeeze:', x.shape)
-        print()
         x = self.linear(x)
         x = self.l2norm(x)
         return x
