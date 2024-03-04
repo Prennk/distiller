@@ -172,6 +172,7 @@ class Embed(nn.Module):
 
         x = x.squeeze(0)
         print('x squeeze:', x)
+        print()
         x = self.linear(x)
         x = self.l2norm(x)
         return x
