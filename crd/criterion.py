@@ -152,7 +152,7 @@ class Embed(nn.Module):
         self.l2norm = Normalize(2)
 
     def forward(self, x):
-        x = x.unsqueeze(0)
+        # x = x.unsqueeze(0)
 
         residual = x
         for i in range(self.num_layers):
@@ -161,7 +161,7 @@ class Embed(nn.Module):
             x += residual
             residual = x
             
-        x = x.squeeze(0)
+        # x = x.squeeze(0)
         x = x.view(x.shape[0], -1)
         x = self.linear(x)
         x = self.l2norm(x)
