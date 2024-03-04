@@ -48,121 +48,130 @@ class CRDLoss(nn.Module):
         return loss
 
 
-# class ContrastLoss(nn.Module):
-#     """
-#     contrastive loss, corresponding to Eq (18)
-#     """
-#     def __init__(self, n_data):
-#         super(ContrastLoss, self).__init__()
-#         self.n_data = n_data
-
-#     def forward(self, x):
-#         bsz = x.shape[0]
-#         m = x.size(1) - 1
-
-#         # noise distribution
-#         Pn = 1 / float(self.n_data)
-
-#         # loss for positive pair
-#         P_pos = x.select(1, 0)
-#         log_D1 = torch.div(P_pos, P_pos.add(m * Pn + eps)).log_()
-
-#         # loss for K negative pair
-#         P_neg = x.narrow(1, 1, m)
-#         log_D0 = torch.div(P_neg.clone().fill_(m * Pn), P_neg.add(m * Pn + eps)).log_()
-
-#         loss = - (log_D1.sum(0) + log_D0.view(-1, 1).sum(0)) / bsz
-
-#         return loss
-
 class ContrastLoss(nn.Module):
     """
-    Contrastive loss with hybrid regularization, corresponding to Eq (18)
+    contrastive loss, corresponding to Eq (18)
     """
-    def __init__(self, n_data, lambda_reg):
+    def __init__(self, n_data):
         super(ContrastLoss, self).__init__()
         self.n_data = n_data
-        self.lambda_reg = lambda_reg
 
-    def forward(self, x, features_s, features_t):
-        # Calculate batch size
+    def forward(self, x):
         bsz = x.shape[0]
-        # Calculate the number of negative samples
         m = x.size(1) - 1
 
-        # Small epsilon value for numerical stability
-        eps = torch.finfo(torch.float32).eps
-
-        # Calculate noise distribution
+        # noise distribution
         Pn = 1 / float(self.n_data)
 
-        # Calculate loss for positive pair
+        # loss for positive pair
         P_pos = x.select(1, 0)
         log_D1 = torch.div(P_pos, P_pos.add(m * Pn + eps)).log_()
 
-        # Calculate loss for K negative pairs
+        # loss for K negative pair
         P_neg = x.narrow(1, 1, m)
         log_D0 = torch.div(P_neg.clone().fill_(m * Pn), P_neg.add(m * Pn + eps)).log_()
 
-        # Calculate total loss
-        loss_contrastive = - (log_D1.sum(0) + log_D0.view(-1, 1).sum(0)) / bsz
+        loss = - (log_D1.sum(0) + log_D0.view(-1, 1).sum(0)) / bsz
 
-        # Regularization term
-        reg_term_s = torch.norm(features_s, p=2)
-        reg_term_t = torch.norm(features_t, p=2)
-        loss_regularization = self.lambda_reg * (reg_term_s + reg_term_t)
+        return loss
 
-        # Combine contrastive loss with regularization
-        total_loss = loss_contrastive + loss_regularization
+# class ContrastLoss(nn.Module):
+#     """
+#     Contrastive loss with hybrid regularization, corresponding to Eq (18)
+#     """
+#     def __init__(self, n_data, lambda_reg):
+#         super(ContrastLoss, self).__init__()
+#         self.n_data = n_data
+#         self.lambda_reg = lambda_reg
 
-        return total_loss
+#     def forward(self, x, features_s, features_t):
+#         # Calculate batch size
+#         bsz = x.shape[0]
+#         # Calculate the number of negative samples
+#         m = x.size(1) - 1
+
+#         # Small epsilon value for numerical stability
+#         eps = torch.finfo(torch.float32).eps
+
+#         # Calculate noise distribution
+#         Pn = 1 / float(self.n_data)
+
+#         # Calculate loss for positive pair
+#         P_pos = x.select(1, 0)
+#         log_D1 = torch.div(P_pos, P_pos.add(m * Pn + eps)).log_()
+
+#         # Calculate loss for K negative pairs
+#         P_neg = x.narrow(1, 1, m)
+#         log_D0 = torch.div(P_neg.clone().fill_(m * Pn), P_neg.add(m * Pn + eps)).log_()
+
+#         # Calculate total loss
+#         loss_contrastive = - (log_D1.sum(0) + log_D0.view(-1, 1).sum(0)) / bsz
+
+#         # Regularization term
+#         reg_term_s = torch.norm(features_s, p=2)
+#         reg_term_t = torch.norm(features_t, p=2)
+#         loss_regularization = self.lambda_reg * (reg_term_s + reg_term_t)
+
+#         # Combine contrastive loss with regularization
+#         total_loss = loss_contrastive + loss_regularization
+
+#         return total_loss
 
 
 
-class Embed(nn.Module):
-    """Embedding module"""
-    def __init__(self, dim_in=1024, dim_out=128):
-        super(Embed, self).__init__()
-        self.linear = nn.Linear(dim_in, dim_out)
-        self.l2norm = Normalize(2)
-
-    def forward(self, x):
-        x = x.view(x.shape[0], -1)
-        x = self.linear(x)
-        x = self.l2norm(x)
-        return x
-
-# import torch.nn.functional as F
 # class Embed(nn.Module):
 #     """Embedding module"""
-#     def __init__(self, dim_in=1024, dim_out=128, num_layers=4, num_heads=8):
+#     def __init__(self, dim_in=1024, dim_out=128):
 #         super(Embed, self).__init__()
-#         self.num_layers = num_layers
-#         self.num_heads = num_heads
-#         self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
-#         self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
-#         self.fc = nn.Linear(dim_out, dim_out)
-#         self.gelu = nn.GELU()
-#         self.norm1 = nn.LayerNorm(dim_out)
-#         self.norm2 = nn.LayerNorm(dim_out)
-        
 #         self.linear = nn.Linear(dim_in, dim_out)
 #         self.l2norm = Normalize(2)
 
 #     def forward(self, x):
 #         x = x.view(x.shape[0], -1)
-
 #         x = self.linear(x)
 #         x = self.l2norm(x)
+        return x
 
-#         x = x.unsqueeze(0)
+import torch.nn.functional as F
+class Embed(nn.Module):
+    """Embedding module"""
+    def __init__(self, dim_in=1024, dim_out=128, num_layers=4, num_heads=8):
+        super(Embed, self).__init__()
+        self.num_layers = num_layers
+        self.num_heads = num_heads
+        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.fc = nn.Linear(dim_out, dim_out)
+        self.gelu = nn.GELU()
+        self.norm1 = nn.LayerNorm(dim_out)
+        self.norm2 = nn.LayerNorm(dim_out)
+        
+        self.linear = nn.Linear(dim_in, dim_out)
+        self.l2norm = Normalize(2)
 
-#         x, _ = self.attention_layers1(x, x, x)
-#         x, _ = self.attention_layers2(x, x, x)
+    def forward(self, x):
+        x = x.view(x.shape[0], -1)
 
-#         x = x.squeeze(0)
+        x = self.linear(x)
+        x = self.l2norm(x)
 
-#         return x
+        x = x.unsqueeze(0)
+
+        residual = x
+        x, _ = self.attention_layers1(x, x, x)
+        x = self.l2norm(x)
+        x += residual
+
+        residual = x
+        x, _ = self.attention_layers2(x, x, x)
+        x = self.l2norm(x)
+        x += residual
+
+        x = x.squeeze(0)
+
+        x = self.fc(x)
+
+        return x
 
 
 class Normalize(nn.Module):
