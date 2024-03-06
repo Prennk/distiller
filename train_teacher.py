@@ -168,7 +168,7 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
 
-    if torch.cuda.is_available():
+    if not torch.cuda.is_available():
         model = model.cuda()
         criterion = criterion.cuda()
         cudnn.benchmark = True
