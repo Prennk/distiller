@@ -22,7 +22,7 @@ def train_vanilla(epoch, train_loader, model, criterion, optimizer, opt):
         data_time.update(time.time() - end)
 
         input = input.float()
-        if not torch.cuda.is_available():
+        if torch.cuda.is_available():
             input = input.cuda()
             target = target.cuda()
 
@@ -100,7 +100,7 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
         data_time.update(time.time() - end)
 
         input = input.float()
-        if not torch.cuda.is_available():
+        if torch.cuda.is_available():
             input = input.cuda()
             target = target.cuda()
             index = index.cuda()
@@ -230,7 +230,7 @@ def validate(val_loader, model, criterion, opt):
         for idx, (input, target) in enumerate(val_loader):
 
             input = input.float()
-            if not torch.cuda.is_available():
+            if torch.cuda.is_available():
                 input = input.cuda()
                 target = target.cuda()
 
