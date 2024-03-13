@@ -135,7 +135,7 @@ class ContrastLoss(nn.Module):
 import torch.nn.functional as F
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, dim_in=1024, dim_out=128, num_heads=4):
+    def __init__(self, dim_in=128, dim_out=128, num_heads=4):
         super(Embed, self).__init__()
         self.num_heads = num_heads
         self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
