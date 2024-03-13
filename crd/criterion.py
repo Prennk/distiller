@@ -162,6 +162,9 @@ class Embed(nn.Module):
     def forward(self, x):
         x = x.view(x.shape[0], -1)
 
+        x = self.linear(x)
+        x = self.l2norm(x)
+
         x = x.unsqueeze(0)
 
         residual = x
@@ -183,9 +186,6 @@ class Embed(nn.Module):
         x += residual
 
         x = x.squeeze(0)
-        
-        x = self.linear(x)
-        x = self.l2norm(x)
 
         return x
 
