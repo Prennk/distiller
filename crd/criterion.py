@@ -138,22 +138,22 @@ class Embed(nn.Module):
     def __init__(self, dim_in=1024, dim_out=128, num_heads=4):
         super(Embed, self).__init__()
         self.num_heads = num_heads
-        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
-        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
-        self.norm1 = nn.LayerNorm(dim_out)
-        self.norm2 = nn.LayerNorm(dim_out)
+        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
+        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
+        self.norm1 = nn.LayerNorm(dim_in)
+        self.norm2 = nn.LayerNorm(dim_in)
 
         self.feed_forward1 = nn.Sequential(
-            nn.Linear(dim_out, dim_out),
+            nn.Linear(dim_in, dim_in),
             nn.ReLU(),
-            nn.Linear(dim_out, dim_out),
-            nn.LayerNorm(dim_out),
+            nn.Linear(dim_in, dim_in),
+            nn.LayerNorm(dim_in),
         )
         self.feed_forward2 = nn.Sequential(
-            nn.Linear(dim_out, dim_out),
+            nn.Linear(dim_in, dim_in),
             nn.ReLU(),
-            nn.Linear(dim_out, dim_out),
-            nn.LayerNorm(dim_out),
+            nn.Linear(dim_in, dim_in),
+            nn.LayerNorm(dim_in),
         )
         
         self.linear = nn.Linear(dim_in, dim_out)
@@ -162,8 +162,8 @@ class Embed(nn.Module):
     def forward(self, x):
         x = x.view(x.shape[0], -1)
 
-        x = self.linear(x)
-        x = self.l2norm(x)
+        # x = self.linear(x)
+        # x = self.l2norm(x)
 
         x = x.unsqueeze(0)
 
