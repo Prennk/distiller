@@ -156,7 +156,7 @@ class Embed(nn.Module):
             nn.LayerNorm(dim_out),
         )
         
-        self.linear = nn.Linear(dim_out, dim_out)
+        self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
