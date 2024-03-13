@@ -135,28 +135,28 @@ class ContrastLoss(nn.Module):
 import torch.nn.functional as F
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, dim_in=128, dim_out=128, num_heads=4):
+    def __init__(self, dim_in=1024, dim_out=128, num_heads=4):
         super(Embed, self).__init__()
         self.num_heads = num_heads
-        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_in, num_heads=num_heads)
-        self.norm1 = nn.LayerNorm(dim_in)
-        self.norm2 = nn.LayerNorm(dim_in)
+        self.attention_layers1 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.attention_layers2 = nn.MultiheadAttention(embed_dim=dim_out, num_heads=num_heads)
+        self.norm1 = nn.LayerNorm(dim_out)
+        self.norm2 = nn.LayerNorm(dim_out)
 
         self.feed_forward1 = nn.Sequential(
-            nn.Linear(dim_in, dim_out),
+            nn.Linear(dim_out, dim_out),
             nn.ReLU(),
-            nn.Linear(dim_out, dim_in),
-            nn.LayerNorm(dim_in),
+            nn.Linear(dim_out, dim_out),
+            nn.LayerNorm(dim_out),
         )
         self.feed_forward2 = nn.Sequential(
-            nn.Linear(dim_in, dim_out),
+            nn.Linear(dim_out, dim_out),
             nn.ReLU(),
-            nn.Linear(dim_out, dim_in),
-            nn.LayerNorm(dim_in),
+            nn.Linear(dim_out, dim_out),
+            nn.LayerNorm(dim_out),
         )
         
-        self.linear = nn.Linear(dim_in, dim_out)
+        self.linear = nn.Linear(dim_out, dim_out)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
