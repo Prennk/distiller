@@ -69,7 +69,7 @@ class CRDLoss(nn.Module):
         self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         self.criterion_t = ContrastLoss(opt.n_data)
         self.criterion_s = ContrastLoss(opt.n_data)
-        self.lambda_reg = 10
+        self.lambda_reg = 0.3
 
     def forward(self, f_s, f_t, idx, contrast_idx=None):
         """
