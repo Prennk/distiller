@@ -5,6 +5,48 @@ from .memory import ContrastMemory
 eps = 1e-7
 
 
+# class CRDLoss(nn.Module):
+#     """CRD Loss function
+#     includes two symmetric parts:
+#     (a) using teacher as anchor, choose positive and negatives over the student side
+#     (b) using student as anchor, choose positive and negatives over the teacher side
+
+#     Args:
+#         opt.s_dim: the dimension of student's feature
+#         opt.t_dim: the dimension of teacher's feature
+#         opt.feat_dim: the dimension of the projection space
+#         opt.nce_k: number of negatives paired with each positive
+#         opt.nce_t: the temperature
+#         opt.nce_m: the momentum for updating the memory buffer
+#         opt.n_data: the number of samples in the training set, therefor the memory buffer is: opt.n_data x opt.feat_dim
+#     """
+#     def __init__(self, opt):
+#         super(CRDLoss, self).__init__()
+#         self.embed_s = Embed(opt.s_dim, opt.feat_dim)
+#         self.embed_t = Embed(opt.t_dim, opt.feat_dim)
+#         self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
+#         self.criterion_t = ContrastLoss(opt.n_data)
+#         self.criterion_s = ContrastLoss(opt.n_data)
+
+#     def forward(self, f_s, f_t, idx, contrast_idx=None):
+#         """
+#         Args:
+#             f_s: the feature of student network, size [batch_size, s_dim]
+#             f_t: the feature of teacher network, size [batch_size, t_dim]
+#             idx: the indices of these positive samples in the dataset, size [batch_size]
+#             contrast_idx: the indices of negative samples, size [batch_size, nce_k]
+
+#         Returns:
+#             The contrastive loss
+#         """
+#         f_s = self.embed_s(f_s)
+#         f_t = self.embed_t(f_t)
+#         out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
+#         s_loss = self.criterion_s(out_s)
+#         t_loss = self.criterion_t(out_t)
+#         loss = s_loss + t_loss
+#         return loss
+
 class CRDLoss(nn.Module):
     """CRD Loss function
     includes two symmetric parts:
@@ -27,6 +69,7 @@ class CRDLoss(nn.Module):
         self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         self.criterion_t = ContrastLoss(opt.n_data)
         self.criterion_s = ContrastLoss(opt.n_data)
+        self.lamda_reg = 10
 
     def forward(self, f_s, f_t, idx, contrast_idx=None):
         """
@@ -45,7 +88,13 @@ class CRDLoss(nn.Module):
         s_loss = self.criterion_s(out_s)
         t_loss = self.criterion_t(out_t)
         loss = s_loss + t_loss
-        return loss
+
+        # reg loss
+        reg_term_s = torch.norm(f_s, p=2)
+        reg_term_t = torch.norm(f_t, p=2)
+        loss_regularization = self.lambda_reg * (reg_term_s + reg_term_t)
+
+        return loss + loss_regularization
 
 
 class ContrastLoss(nn.Module):
@@ -75,12 +124,12 @@ class ContrastLoss(nn.Module):
 
         return loss
 
-# class ContrastLoss(nn.Module):
+# class RegContrastLoss(nn.Module):
 #     """
 #     Contrastive loss with hybrid regularization, corresponding to Eq (18)
 #     """
 #     def __init__(self, n_data, lambda_reg=10):
-#         super(ContrastLoss, self).__init__()
+#         super(RegContrastLoss, self).__init__()
 #         self.n_data = n_data
 #         self.lambda_reg = lambda_reg
 
