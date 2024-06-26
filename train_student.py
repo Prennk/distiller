@@ -91,6 +91,8 @@ def parse_option():
     parser.add_argument('--nce_k', default=16384, type=int, help='number of negative samples for NCE')
     parser.add_argument('--nce_t', default=0.07, type=float, help='temperature parameter for softmax')
     parser.add_argument('--nce_m', default=0.5, type=float, help='momentum for non-parametric updates')
+    parser.add_argument('--hcl_beta', default=2.0, type=float, help='beta for reweighting negative sample')
+    parser.add_argument('--hcl_tau_plus', default=0.1, type=float, help='??')
 
     # hint layer
     parser.add_argument('--hint_layer', default=2, type=int, choices=[0, 1, 2, 3, 4])
