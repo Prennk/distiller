@@ -74,7 +74,7 @@ def parse_option():
 
     # distillation
     parser.add_argument('--distill', type=str, default='kd', choices=['kd', 'hint', 'attention', 'similarity',
-                                                                      'correlation', 'vid', 'crd', 'crd+' 'kdsvd', 'fsp',
+                                                                      'correlation', 'vid', 'crd', 'crd+', 'kdsvd', 'fsp',
                                                                       'rkd', 'pkt', 'abound', 'factor', 'nst'])
     parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
 
