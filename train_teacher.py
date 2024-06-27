@@ -61,10 +61,13 @@ def parse_option():
                                  'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
                                  'efficientnet_b0'])
 
+    parser.add_argument('--seed', type=int, default=42, help='seed for reproducibility')
     parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
 
     opt = parser.parse_args()
     
+    torch.manual_seed(opt.seed)
+
     # set different learning rate from these 4 models
     if opt.model in ['mobilenetv2_6_025', 'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenet_v2_half', 'ShuffleV1', 'ShuffleV2']:
         opt.learning_rate = 0.01
@@ -101,6 +104,7 @@ def parse_option():
 
 
 def main():
+    torch.manual_seed(opt.seed)
     best_acc = 0
 
     opt = parse_option()
@@ -122,6 +126,8 @@ def main():
     else:
         raise NotImplementedError(opt.dataset)
 
+    torch.manual_seed(opt.seed)
+    
     # model
     model = model_dict[opt.model](num_classes=n_cls)
 
