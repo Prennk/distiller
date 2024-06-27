@@ -93,7 +93,7 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
 
     end = time.time()
     for idx, data in enumerate(train_loader):
-        if opt.distill == ['crd', 'crd_plus']:
+        if opt.distill in ['crd', 'crd_plus']:
             input, target, index, contrast_idx = data
         else:
             input, target, index = data
