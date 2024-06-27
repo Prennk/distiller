@@ -104,10 +104,10 @@ def parse_option():
 
 
 def main():
-    torch.manual_seed(opt.seed)
     best_acc = 0
 
     opt = parse_option()
+    torch.manual_seed(opt.seed)
 
     # dataloader
     if opt.dataset == 'cifar100':
