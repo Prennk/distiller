@@ -225,7 +225,7 @@ def main():
         regress_s = ConvReg(feat_s[opt.hint_layer].shape, feat_t[opt.hint_layer].shape)
         module_list.append(regress_s)
         trainable_list.append(regress_s)
-    elif opt.distill == 'crd' or 'crd_plus:
+    elif opt.distill == 'crd' or 'crd_plus':
         opt.s_dim = feat_s[-1].shape[1]
         opt.t_dim = feat_t[-1].shape[1]
         opt.n_data = n_data
