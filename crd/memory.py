@@ -368,7 +368,7 @@ class ContrastMemoryWithTopkSampling(nn.Module):
         # _, negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
         _, sorted_indices = torch.sort(sim_matrix)
         middle_index_start = (len(sorted_indices) - (K + 1)) // 2
-        middle_index_end = middle_index_end + (K + 1)
+        middle_index_end = middle_index_start + (K + 1)
         negative_indices = sorted_indices[middle_index_start:middle_index_end]
         
         # Ensure the first column is the positive sample
@@ -390,7 +390,7 @@ class ContrastMemoryWithTopkSampling(nn.Module):
         # _, negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
         _, sorted_indices = torch.sort(sim_matrix)
         middle_index_start = (len(sorted_indices) - (K + 1)) // 2
-        middle_index_end = middle_index_end + (K + 1)
+        middle_index_end = middle_index_start + (K + 1)
         negative_indices = sorted_indices[middle_index_start:middle_index_end]
         
         # Ensure the first column is the positive sample
