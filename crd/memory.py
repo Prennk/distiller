@@ -307,8 +307,8 @@ class ContrastMemoryWithTopkSampling(nn.Module):
 
         # original score computation
         # draw index based on topk sampling
-        idx_memory_v1 = self._get_memory_v1_hard_negative_samples(v2, y, K)
-        idx_memory_v2 = self._get_memory_v2_hard_negative_samples(v1, y, K)
+        idx_memory_v1 = self._get_memory_v1_negative_samples(v2, y, K)
+        idx_memory_v2 = self._get_memory_v2_negative_samples(v1, y, K)
         
         # sample
         weight_v1 = torch.index_select(self.memory_v1, 0, idx_memory_v1.view(-1)).detach()
@@ -354,7 +354,7 @@ class ContrastMemoryWithTopkSampling(nn.Module):
 
         return out_v1, out_v2
 
-    def _get_memory_v1_hard_negative_samples(self, v2, y, K):
+    def _get_memory_v1_negative_samples(self, v2, y, K):
         """
         Get hard negative samples from memory v1 based on cosine similarity of v2
         """
@@ -364,15 +364,19 @@ class ContrastMemoryWithTopkSampling(nn.Module):
         memory = F.normalize(self.memory_v1, dim=1)
         sim_matrix = torch.matmul(v2, memory.t())
 
-        # Select the hardest negatives
-        _, hard_negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        # Select negatives
+        # _, negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        _, sorted_indices = torch.sort(sim_matrix)
+        middle_index_start = (len(sorted_indices) - (K + 1)) // 2
+        middle_index_end = middle_index_end + (K + 1)
+        negative_indices = sorted_indices[middle_index_start:middle_index_end]
         
         # Ensure the first column is the positive sample
-        hard_negative_indices[:, 0] = y
+        negative_indices[:, 0] = y
         
-        return hard_negative_indices
+        return negative_indices
 
-    def _get_memory_v2_hard_negative_samples(self, v1, y, K):
+    def _get_memory_v2_negative_samples(self, v1, y, K):
         """
         Get hard negative samples from memory v2 based on cosine similarity of v1
         """
@@ -382,10 +386,14 @@ class ContrastMemoryWithTopkSampling(nn.Module):
         memory = F.normalize(self.memory_v2, dim=1)
         sim_matrix = torch.matmul(v1, memory.t())
 
-        # Select the hardest negatives
-        _, hard_negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        # Select negatives
+        # _, negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        _, sorted_indices = torch.sort(sim_matrix)
+        middle_index_start = (len(sorted_indices) - (K + 1)) // 2
+        middle_index_end = middle_index_end + (K + 1)
+        negative_indices = sorted_indices[middle_index_start:middle_index_end]
         
         # Ensure the first column is the positive sample
-        hard_negative_indices[:, 0] = y
+        negative_indices[:, 0] = y
         
-        return hard_negative_indices
+        return negative_indices
