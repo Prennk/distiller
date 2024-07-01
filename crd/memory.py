@@ -373,7 +373,7 @@ class ContrastMemoryWithTopkSampling(nn.Module):
         
         # Ensure the first column is the positive sample
         negative_indices[:, 0] = y
-        
+        print(negative_indices.shape)
         return negative_indices
 
     def _get_memory_v2_negative_samples(self, v1, y, K):
