@@ -296,22 +296,26 @@ class ContrastMemoryWithTopkSampling(nn.Module):
             self.memory_v2.index_copy_(0, y, updated_v2)
 
         return out_v1, out_v2
-
+    
     def _get_memory_v1_hard_negative_samples(self, v2, y, K):
         """
         Get hard negative samples from memory v1 based on cosine similarity of v2
         """
-        
         # Compute cosine similarity
         v2 = F.normalize(v2, dim=1)
         memory = F.normalize(self.memory_v1, dim=1)
         sim_matrix = torch.matmul(v2, memory.t())
 
+        # Exclude positive samples
+        mask = torch.ones_like(sim_matrix)
+        mask[torch.arange(sim_matrix.size(0)), y] = 0
+        sim_matrix = sim_matrix * mask
+
         # Select negatives
-        _, hard_negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        _, hard_negative_indices = torch.topk(sim_matrix, K, largest=True, dim=1)
         
         # Ensure the first column is the positive sample
-        hard_negative_indices[:, 0] = y
+        hard_negative_indices = torch.cat([y.unsqueeze(1), hard_negative_indices], dim=1)
         
         return hard_negative_indices
 
@@ -319,19 +323,59 @@ class ContrastMemoryWithTopkSampling(nn.Module):
         """
         Get hard negative samples from memory v2 based on cosine similarity of v1
         """
-        
         # Compute cosine similarity
         v1 = F.normalize(v1, dim=1)
         memory = F.normalize(self.memory_v2, dim=1)
         sim_matrix = torch.matmul(v1, memory.t())
 
+        # Exclude positive samples
+        mask = torch.ones_like(sim_matrix)
+        mask[torch.arange(sim_matrix.size(0)), y] = 0
+        sim_matrix = sim_matrix * mask
+
         # Select negatives
-        _, hard_negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        _, hard_negative_indices = torch.topk(sim_matrix, K, largest=True, dim=1)
         
         # Ensure the first column is the positive sample
-        hard_negative_indices[:, 0] = y
+        hard_negative_indices = torch.cat([y.unsqueeze(1), hard_negative_indices], dim=1)
         
         return hard_negative_indices
+
+    # def _get_memory_v1_hard_negative_samples(self, v2, y, K):
+    #     """
+    #     Get hard negative samples from memory v1 based on cosine similarity of v2
+    #     """
+        
+    #     # Compute cosine similarity
+    #     v2 = F.normalize(v2, dim=1)
+    #     memory = F.normalize(self.memory_v1, dim=1)
+    #     sim_matrix = torch.matmul(v2, memory.t())
+
+    #     # Select negatives
+    #     _, hard_negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        
+    #     # Ensure the first column is the positive sample
+    #     hard_negative_indices[:, 0] = y
+        
+    #     return hard_negative_indices
+
+    # def _get_memory_v2_hard_negative_samples(self, v1, y, K):
+    #     """
+    #     Get hard negative samples from memory v2 based on cosine similarity of v1
+    #     """
+        
+    #     # Compute cosine similarity
+    #     v1 = F.normalize(v1, dim=1)
+    #     memory = F.normalize(self.memory_v2, dim=1)
+    #     sim_matrix = torch.matmul(v1, memory.t())
+
+    #     # Select negatives
+    #     _, hard_negative_indices = torch.topk(sim_matrix, K + 1, largest=False, dim=1)
+        
+    #     # Ensure the first column is the positive sample
+    #     hard_negative_indices[:, 0] = y
+        
+    #     return hard_negative_indices
 
 
 class ContrastMemoryWithHardNegative(nn.Module):
