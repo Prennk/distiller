@@ -525,12 +525,8 @@ class ContrastMemoryWithHardNegative(nn.Module):
         return hard_neg_idx
 
 
-import torch
-from torch import nn
-import math
-import faiss
-
 class ContrastMemoryWithKMeans(nn.Module):
+    import faiss
     """
     memory buffer that supplies large amount of negative samples using k-means centroids.
     """
