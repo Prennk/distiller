@@ -528,7 +528,7 @@ class ContrastMemoryWithHardNegative(nn.Module):
 import torch
 from torch import nn
 import math
-import faiss.Kmeans as KMeans
+import faiss
 
 class ContrastMemoryWithKMeans(nn.Module):
     """
@@ -559,12 +559,14 @@ class ContrastMemoryWithKMeans(nn.Module):
         # sample using centroids from k-means
         with torch.no_grad():
             # Apply k-means clustering
-            kmeans_v1 = KMeans(n_clusters=self.K + 1, random_state=0).fit(self.memory_v1.cpu().numpy())
-            centroids_v1 = torch.tensor(kmeans_v1.cluster_centers_).to(self.memory_v1.device)
+            kmeans_v1 = faiss.Kmeans(inputSize, self.K + 1, gpu=True)
+            kmeans_v1.train(self.memory_v1.cpu().numpy())
+            centroids_v1 = torch.tensor(kmeans_v1.centroids).to(self.memory_v1.device)
             centroids_v1.select(1, 0).copy_(y.data)
             
-            kmeans_v2 = KMeans(n_clusters=self.K + 1, random_state=0).fit(self.memory_v2.cpu().numpy())
-            centroids_v2 = torch.tensor(kmeans_v2.cluster_centers_).to(self.memory_v2.device)
+            kmeans_v2 = faiss.Kmeans(inputSize, self.K + 1, gpu=True)
+            kmeans_v2.train(self.memory_v2.cpu().numpy())
+            centroids_v2 = torch.tensor(kmeans_v2.centroids).to(self.memory_v2.device)
             centroids_v2.select(1, 0).copy_(y.data)
 
         # use centroids as representations
