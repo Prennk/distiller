@@ -561,12 +561,12 @@ class ContrastMemoryWithKMeans(nn.Module):
             # Apply k-means clustering
             kmeans_v1 = faiss.Kmeans(inputSize, self.K + 1, gpu=True)
             kmeans_v1.train(self.memory_v1.cpu().numpy())
-            centroids_v1 = torch.tensor(kmeans_v1.centroids).to(self.memory_v1.device)
+            centroids_v1 = torch.tensor(kmeans_v1.centroids).to(self.memory_v1.device).view(batchSize, -1)
             centroids_v1.select(1, 0).copy_(y.data)
             
             kmeans_v2 = faiss.Kmeans(inputSize, self.K + 1, gpu=True)
             kmeans_v2.train(self.memory_v2.cpu().numpy())
-            centroids_v2 = torch.tensor(kmeans_v2.centroids).to(self.memory_v2.device)
+            centroids_v2 = torch.tensor(kmeans_v2.centroids).to(self.memory_v2.device).view(batchSize, -1)
             centroids_v2.select(1, 0).copy_(y.data)
 
         # use centroids as representations
