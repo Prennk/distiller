@@ -75,7 +75,8 @@ def parse_option():
     # distillation
     parser.add_argument('--distill', type=str, default='kd', choices=['kd', 'hint', 'attention', 'similarity',
                                                                       'correlation', 'vid', 
-                                                                      'crd', 'crd_hcl', 'crd_topk', 'crd_hardneg',
+                                                                      'crd', 'crd_hcl', 'crd_topk', 
+                                                                      'crd_hardneg', 'crd_kmeans',
                                                                       'kdsvd', 'fsp',
                                                                       'rkd', 'pkt', 'abound', 'factor', 'nst'])
     parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
@@ -168,7 +169,7 @@ def main():
 
     # dataloader
     if opt.dataset == 'cifar100':
-        if opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg']:
+        if opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg', 'crd_kmeans']:
             if opt.upsample:
                 train_loader, val_loader, n_data = get_upsampled_cifar100_dataloaders_sample(batch_size=opt.batch_size,
                                                                                num_workers=opt.num_workers,
@@ -185,7 +186,7 @@ def main():
                                                                         is_instance=True)
         n_cls = 100
     elif opt.dataset == 'road_sign':
-        if opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg']:
+        if opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg', 'crd_kmeans']:
             train_loader, val_loader, n_data = get_road_signs_contrastive_dataloaders(batch_size=opt.batch_size,
                                                                                num_workers=opt.num_workers,
                                                                                k=opt.nce_k,
@@ -227,7 +228,7 @@ def main():
         regress_s = ConvReg(feat_s[opt.hint_layer].shape, feat_t[opt.hint_layer].shape)
         module_list.append(regress_s)
         trainable_list.append(regress_s)
-    elif opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg']:
+    elif opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg', 'crd_kmeans']:
         opt.s_dim = feat_s[-1].shape[1]
         opt.t_dim = feat_t[-1].shape[1]
         opt.n_data = n_data

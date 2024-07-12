@@ -559,20 +559,22 @@ class ContrastMemoryWithKMeans(nn.Module):
         # sample using centroids from k-means
         with torch.no_grad():
             # Apply k-means clustering
-            kmeans_v1 = KMeans(n_clusters=self.K, random_state=0).fit(self.memory_v1.cpu().numpy())
+            kmeans_v1 = KMeans(n_clusters=self.K + 1, random_state=0).fit(self.memory_v1.cpu().numpy())
             centroids_v1 = torch.tensor(kmeans_v1.cluster_centers_).to(self.memory_v1.device)
+            centroids_v1.select(1, 0).copy_(y.data)
             
-            kmeans_v2 = KMeans(n_clusters=self.K, random_state=0).fit(self.memory_v2.cpu().numpy())
+            kmeans_v2 = KMeans(n_clusters=self.K + 1, random_state=0).fit(self.memory_v2.cpu().numpy())
             centroids_v2 = torch.tensor(kmeans_v2.cluster_centers_).to(self.memory_v2.device)
+            centroids_v2.select(1, 0).copy_(y.data)
 
         # use centroids as representations
         weight_v1 = centroids_v1.detach()
-        weight_v1 = weight_v1.view(K, inputSize)
+        weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         out_v2 = torch.bmm(weight_v1.unsqueeze(0).expand(batchSize, -1, -1), v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
 
         weight_v2 = centroids_v2.detach()
-        weight_v2 = weight_v2.view(K, inputSize)
+        weight_v2 = weight_v2.view(batchSize, K + 1, inputSize)
         out_v1 = torch.bmm(weight_v2.unsqueeze(0).expand(batchSize, -1, -1), v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
