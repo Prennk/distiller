@@ -528,7 +528,7 @@ class ContrastMemoryWithHardNegative(nn.Module):
 import torch
 from torch import nn
 import math
-from sklearn.cluster import KMeans
+import faiss.Kmeans as KMeans
 
 class ContrastMemoryWithKMeans(nn.Module):
     """
