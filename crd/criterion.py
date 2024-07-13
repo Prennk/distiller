@@ -35,9 +35,7 @@ class CRDLoss(nn.Module):
             self.contrast = ContrastMemoryWithHardNegative(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_cc':
             self.contrast = ContrastMemoryCC(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-            self.criterion_cluster_t = ContrastLoss(opt.n_data)
-            self.criterion_cluster_s = ContrastLoss(opt.n_data)
-            self.criterion_cluster = ClusterLoss(100, 1.0, 'cuda')
+            self.criterion_cluster = ContrastLoss(opt.n_data)
         else:
             raise KeyError('Invalid CRD variant')
         self.criterion_t = ContrastLoss(opt.n_data)
@@ -59,13 +57,13 @@ class CRDLoss(nn.Module):
         f_t = self.embed_t(f_t)
 
         if self.distill == 'crd_cc':
-            out_s, out_t, weight_v1, weight_v2 = self.contrast(f_s, f_t, idx, contrast_idx)
+            out_s, out_t, cluster = self.contrast(f_s, f_t, idx, contrast_idx)
         else:
             out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
 
         s_loss = self.criterion_s(out_s)
         t_loss = self.criterion_t(out_t)
-        cluster_loss = self.criterion_cluster(weight_v1, weight_v2)
+        cluster_loss = self.criterion_cluster(cluster)
 
         loss = s_loss + t_loss + cluster_loss
         
@@ -98,61 +96,6 @@ class ContrastLoss(nn.Module):
         loss = - (log_D1.sum(0) + log_D0.view(-1, 1).sum(0)) / bsz
 
         return loss
-
-class ClusterLoss(nn.Module):
-    def __init__(self, class_num, temperature, device):
-        super(ClusterLoss, self).__init__()
-        self.class_num = class_num
-        self.temperature = temperature
-        self.device = device
-
-        self.mask = self.mask_correlated_clusters(class_num)
-        self.criterion = nn.CrossEntropyLoss(reduction="sum")
-        self.similarity_f = nn.CosineSimilarity(dim=2)
-
-    def mask_correlated_clusters(self, class_num):
-        # N = 2 * class_num
-        N = 2048
-        mask = torch.ones((N, N))
-        mask = mask.fill_diagonal_(0)
-        for i in range(class_num):
-            mask[i, class_num + i] = 0
-            mask[class_num + i, i] = 0
-        mask = mask.bool()
-        return mask
-
-    def forward(self, c_i, c_j):
-        p_i = c_i.sum(0).view(-1)
-        p_i /= p_i.sum()
-        ne_i = math.log(p_i.size(0)) + (p_i * torch.log(p_i)).sum()
-        p_j = c_j.sum(0).view(-1)
-        p_j /= p_j.sum()
-        ne_j = math.log(p_j.size(0)) + (p_j * torch.log(p_j)).sum()
-        ne_loss = ne_i + ne_j
-
-        batch_size = c_i.shape[0]
-
-        c_i = c_i.view(batch_size, -1).t()
-        c_j = c_j.view(batch_size, -1).t()
-        # N = 2 * self.class_num
-        N = 3896
-        c = torch.cat((c_i, c_j), dim=0)
-
-        sim = self.similarity_f(c.unsqueeze(1), c.unsqueeze(0)) / self.temperature
-        sim_i_j = torch.diag(sim, self.class_num)
-        sim_j_i = torch.diag(sim, -self.class_num)
-        print(f"sim_i_j: {sim_i_j.shape}")
-        print(f"sim_j_i: {sim_j_i.shape}")
-
-        positive_clusters = torch.cat((sim_i_j, sim_j_i), dim=0).reshape(N, 1)
-        negative_clusters = sim[self.mask].reshape(N, -1)
-
-        labels = torch.zeros(N).to(positive_clusters.device).long()
-        logits = torch.cat((positive_clusters, negative_clusters), dim=1)
-        loss = self.criterion(logits, labels)
-        loss /= N
-
-        return loss + ne_loss
 
 class Embed(nn.Module):
     """Embedding module"""

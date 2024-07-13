@@ -477,6 +477,10 @@ class ContrastMemoryCC(nn.Module):
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
+        # -
+        cluster = torch.bmm(weight_v1, weight_v2.transpose(1, 2))
+        cluster = cluster.mean(-1).unsqueeze(-1)
+
         # set Z if haven't been set yet
         if Z_v1 < 0:
             self.params[2] = out_v1.mean() * outputSize
@@ -507,12 +511,6 @@ class ContrastMemoryCC(nn.Module):
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
-        idx = self.multinomial.draw(batchSize * (8)).view(batchSize, -1)
-        weight_v1 = torch.index_select(self.memory_v1, 0, idx.view(-1)).detach()
-        weight_v1 = weight_v1.view(batchSize, 8, inputSize)
-        weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
-        weight_v2 = weight_v2.view(batchSize, 8, inputSize)
-
-        return out_v1, out_v2, weight_v1, weight_v2
+        return out_v1, out_v2, cluster
     
 
