@@ -24,8 +24,8 @@ class CRDLoss(nn.Module):
     """
     def __init__(self, opt):
         super(CRDLoss, self).__init__()
-        self.embed_s = Embed(opt.s_dim, opt.feat_dim)
-        self.embed_t = Embed(opt.t_dim, opt.feat_dim)
+        self.embed_s = Embed(opt.distill, opt.s_dim, opt.feat_dim)
+        self.embed_t = Embed(opt.distill, opt.t_dim, opt.feat_dim)
         if opt.distill == 'crd':
             self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_topk':
@@ -104,12 +104,12 @@ class ContrastLoss(nn.Module):
 
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, opt, dim_in=1024, dim_out=128):
+    def __init__(self, distill, dim_in=1024, dim_out=128):
         super(Embed, self).__init__()
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
         self.linear_class = nn.Linear(dim_in, 100)
-        self.distill = opt.distill
+        self.distill = distill
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
