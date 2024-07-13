@@ -139,6 +139,8 @@ class ClusterLoss(nn.Module):
         sim = self.similarity_f(c.unsqueeze(1), c.unsqueeze(0)) / self.temperature
         sim_i_j = torch.diag(sim, self.class_num)
         sim_j_i = torch.diag(sim, -self.class_num)
+        print(f"sim_i_j: {sim_i_j.shape}")
+        print(f"sim_j_i: {sim_j_i.shape}")
 
         positive_clusters = torch.cat((sim_i_j, sim_j_i), dim=0).reshape(N, 1)
         negative_clusters = sim[self.mask].reshape(N, -1)
