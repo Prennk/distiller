@@ -112,7 +112,7 @@ class ClusterLoss(nn.Module):
 
     def mask_correlated_clusters(self, class_num):
         # N = 2 * class_num
-        N = 3896
+        N = 2048
         mask = torch.ones((N, N))
         mask = mask.fill_diagonal_(0)
         for i in range(class_num):
