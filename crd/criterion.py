@@ -58,7 +58,7 @@ class CRDLoss(nn.Module):
         f_s = self.embed_s(x_s)
         f_t = self.embed_t(x_t)
         y_s = self.embed_cluster_s(x_s)
-        y_t = self.embed_cluster_s(x_t)
+        y_t = self.embed_cluster_t(x_t)
         if self.distill == 'crd_cc':
             out_s, out_t, out_cluster_s, out_cluster_t = self.contrast(f_s, f_t, y_s, y_t, idx, contrast_idx)
             s_loss = self.criterion_s(out_s)
@@ -131,7 +131,7 @@ class Embed_2(nn.Module):
     """Embedding module"""
     def __init__(self, K, dim_in=1024):
         super(Embed_2, self).__init__()
-        self.linear = nn.Linear(dim_in, K + 1)
+        self.linear_1 = nn.Linear(dim_in, K + 1)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
