@@ -1,8 +1,8 @@
 import torch
 from torch import nn
-from .memory import ContrastMemory, ContrastMemoryWithHCL, \
-    ContrastMemoryWithTopkSampling, ContrastMemoryWithHardNegative, \
-    ContrastMemoryWithKMeans
+from .memory import ContrastMemory,\
+    ContrastMemoryWithTopkSampling, ContrastMemoryWithHardNegative,\
+    ContrastMemoryCC
 
 eps = 1e-7
 
@@ -28,18 +28,19 @@ class CRDLoss(nn.Module):
         self.embed_t = Embed(opt.t_dim, opt.feat_dim)
         if opt.distill == 'crd':
             self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-        elif opt.distill == 'crd_hcl':
-            self.contrast = ContrastMemoryWithHCL(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m, opt.hcl_beta, opt.hcl_tau_plus)
         elif opt.distill == 'crd_topk':
             self.contrast = ContrastMemoryWithTopkSampling(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_hardneg':
             self.contrast = ContrastMemoryWithHardNegative(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-        elif opt.distill == 'crd_kmeans':
-            self.contrast = ContrastMemoryWithKMeans(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
+        elif opt.distill == 'crd_cc':
+            self.contrast = ContrastMemoryCC(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
+            self.criterion_cluster_t = ContrastLoss(opt.n_data)
+            self.criterion_cluster_s = ContrastLoss(opt.n_data)
         else:
             raise KeyError('Invalid CRD variant')
         self.criterion_t = ContrastLoss(opt.n_data)
         self.criterion_s = ContrastLoss(opt.n_data)
+        self.distill = opt.distill
 
     def forward(self, f_s, f_t, idx, contrast_idx=None):
         """
@@ -54,10 +55,22 @@ class CRDLoss(nn.Module):
         """
         f_s = self.embed_s(f_s)
         f_t = self.embed_t(f_t)
-        out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
-        s_loss = self.criterion_s(out_s)
-        t_loss = self.criterion_t(out_t)
-        loss = s_loss + t_loss
+        if self.distill == 'crd_cc':
+            out_s, out_t, out_cluster_s, out_cluster_t = self.contrast(f_s, f_t, idx, contrast_idx)
+            s_loss = self.criterion_s(out_s)
+            t_loss = self.criterion_t(out_t)
+            s_cluster_loss = self.criterion_cluster_s(out_cluster_s)
+            t_cluster_loss = self.criterion_cluster_s(out_cluster_t)
+
+            loss = loss = s_loss + t_loss + s_cluster_loss + t_cluster_loss
+        else:
+            out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
+            s_loss = self.criterion_s(out_s)
+            t_loss = self.criterion_t(out_t)
+
+            loss = s_loss + t_loss
+        
+
         return loss
 
 
@@ -91,14 +104,21 @@ class ContrastLoss(nn.Module):
 
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, dim_in=1024, dim_out=128):
+    def __init__(self, opt, dim_in=1024, dim_out=128):
         super(Embed, self).__init__()
         self.linear = nn.Linear(dim_in, dim_out)
         self.l2norm = Normalize(2)
+        self.linear_class = nn.Linear(dim_in, 100)
+        self.distill = opt.distill
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = self.linear(x)
+
+        if self.distill == 'crd_cc':
+            x = self.linear_class(x)
+        else:
+            x = self.linear(x)
+
         x = self.l2norm(x)
         return x
 

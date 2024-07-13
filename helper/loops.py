@@ -93,7 +93,7 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
 
     end = time.time()
     for idx, data in enumerate(train_loader):
-        if opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg', 'crd_kmeans']:
+        if opt.distill in ['crd', 'crd_topk', 'crd_hardneg', 'crd_cc']:
             input, target, index, contrast_idx = data
         else:
             input, target, index = data
@@ -104,7 +104,7 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
             input = input.cuda()
             target = target.cuda()
             index = index.cuda()
-            if opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg', 'crd_kmeans']:
+            if opt.distill in ['crd', 'crd_topk', 'crd_hardneg', 'crd_cc']:
                 contrast_idx = contrast_idx.cuda()
 
         # ===================forward=====================
@@ -127,7 +127,7 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
             f_s = module_list[1](feat_s[opt.hint_layer])
             f_t = feat_t[opt.hint_layer]
             loss_kd = criterion_kd(f_s, f_t)
-        elif opt.distill in ['crd', 'crd_hcl', 'crd_topk', 'crd_hardneg', 'crd_kmeans']:
+        elif opt.distill in ['crd', 'crd_topk', 'crd_hardneg', 'crd_cc']:
             f_s = feat_s[-1]
             f_t = feat_t[-1]
             loss_kd = criterion_kd(f_s, f_t, index, contrast_idx)
