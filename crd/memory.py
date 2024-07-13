@@ -507,6 +507,12 @@ class ContrastMemoryCC(nn.Module):
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
+        idx = self.multinomial.draw(batchSize * (32)).view(batchSize, -1)
+        weight_v1 = torch.index_select(self.memory_v1, 0, idx.view(-1)).detach()
+        weight_v1 = weight_v1.view(batchSize, 32, inputSize)
+        weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
+        weight_v2 = weight_v2.view(batchSize, 32, inputSize)
+
         return out_v1, out_v2, weight_v1, weight_v2
     
 
