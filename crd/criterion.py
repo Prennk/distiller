@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import math
 from .memory import ContrastMemory,\
     ContrastMemoryWithTopkSampling, ContrastMemoryWithHardNegative,\
     ContrastMemoryCC
@@ -33,18 +34,17 @@ class CRDLoss(nn.Module):
         elif opt.distill == 'crd_hardneg':
             self.contrast = ContrastMemoryWithHardNegative(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_cc':
-            self.embed_cluster_s = Embed_2(opt.nce_k, opt.s_dim)
-            self.embed_cluster_t = Embed_2(opt.nce_k, opt.t_dim)
-            self.contrast = ContrastMemoryCC(100, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
+            self.contrast = ContrastMemoryCC(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
             self.criterion_cluster_t = ContrastLoss(opt.n_data)
             self.criterion_cluster_s = ContrastLoss(opt.n_data)
+            self.criterion_cluster = ClusterLoss(100, 1.0, 'cuda')
         else:
             raise KeyError('Invalid CRD variant')
         self.criterion_t = ContrastLoss(opt.n_data)
         self.criterion_s = ContrastLoss(opt.n_data)
         self.distill = opt.distill
 
-    def forward(self, x_s, x_t, idx, contrast_idx=None):
+    def forward(self, f_s, f_t, idx, contrast_idx=None):
         """
         Args:
             f_s: the feature of student network, size [batch_size, s_dim]
@@ -55,26 +55,20 @@ class CRDLoss(nn.Module):
         Returns:
             The contrastive loss
         """
-        f_s = self.embed_s(x_s)
-        f_t = self.embed_t(x_t)
-        y_s = self.embed_cluster_s(x_s)
-        y_t = self.embed_cluster_t(x_t)
-        if self.distill == 'crd_cc':
-            out_s, out_t, out_cluster_s, out_cluster_t = self.contrast(f_s, f_t, y_s, y_t, idx, contrast_idx)
-            s_loss = self.criterion_s(out_s)
-            t_loss = self.criterion_t(out_t)
-            s_cluster_loss = self.criterion_cluster_s(out_cluster_s)
-            t_cluster_loss = self.criterion_cluster_s(out_cluster_t)
+        f_s = self.embed_s(f_s)
+        f_t = self.embed_t(f_t)
 
-            loss = loss = ((s_loss + t_loss) * 0.5) + ((s_cluster_loss + t_cluster_loss) * 0.5)
+        if self.distill == 'crd_cc':
+            out_s, out_t, weight_v1, weight_v2 = self.contrast(f_s, f_t, idx, contrast_idx)
         else:
             out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
-            s_loss = self.criterion_s(out_s)
-            t_loss = self.criterion_t(out_t)
 
-            loss = s_loss + t_loss
+        s_loss = self.criterion_s(out_s)
+        t_loss = self.criterion_t(out_t)
+        cluster_loss = self.criterion_cluster(weight_v1, weight_v2)
+
+        loss = s_loss + t_loss + cluster_loss
         
-
         return loss
 
 
@@ -105,32 +99,60 @@ class ContrastLoss(nn.Module):
 
         return loss
 
+class ClusterLoss(nn.Module):
+    def __init__(self, class_num, temperature, device):
+        super(ClusterLoss, self).__init__()
+        self.class_num = class_num
+        self.temperature = temperature
+        self.device = device
+
+        self.mask = self.mask_correlated_clusters(class_num)
+        self.criterion = nn.CrossEntropyLoss(reduction="sum")
+        self.similarity_f = nn.CosineSimilarity(dim=2)
+
+    def mask_correlated_clusters(self, class_num):
+        N = 2 * class_num
+        mask = torch.ones((N, N))
+        mask = mask.fill_diagonal_(0)
+        for i in range(class_num):
+            mask[i, class_num + i] = 0
+            mask[class_num + i, i] = 0
+        mask = mask.bool()
+        return mask
+
+    def forward(self, c_i, c_j):
+        p_i = c_i.sum(0).view(-1)
+        p_i /= p_i.sum()
+        ne_i = math.log(p_i.size(0)) + (p_i * torch.log(p_i)).sum()
+        p_j = c_j.sum(0).view(-1)
+        p_j /= p_j.sum()
+        ne_j = math.log(p_j.size(0)) + (p_j * torch.log(p_j)).sum()
+        ne_loss = ne_i + ne_j
+
+        c_i = c_i.t()
+        c_j = c_j.t()
+        N = 2 * self.class_num
+        c = torch.cat((c_i, c_j), dim=0)
+
+        sim = self.similarity_f(c.unsqueeze(1), c.unsqueeze(0)) / self.temperature
+        sim_i_j = torch.diag(sim, self.class_num)
+        sim_j_i = torch.diag(sim, -self.class_num)
+
+        positive_clusters = torch.cat((sim_i_j, sim_j_i), dim=0).reshape(N, 1)
+        negative_clusters = sim[self.mask].reshape(N, -1)
+
+        labels = torch.zeros(N).to(positive_clusters.device).long()
+        logits = torch.cat((positive_clusters, negative_clusters), dim=1)
+        loss = self.criterion(logits, labels)
+        loss /= N
+
+        return loss + ne_loss
 
 class Embed(nn.Module):
     """Embedding module"""
-    def __init__(self, distill, dim_in=1024, dim_out=128):
+    def __init__(self, dim_in=1024, dim_out=128):
         super(Embed, self).__init__()
         self.linear = nn.Linear(dim_in, dim_out)
-        self.l2norm = Normalize(2)
-        self.linear_class = nn.Linear(dim_in, 100)
-        self.distill = distill
-
-    def forward(self, x):
-        x = x.view(x.shape[0], -1)
-
-        if self.distill == 'crd_cc':
-            x = self.linear_class(x)
-        else:
-            x = self.linear(x)
-
-        x = self.l2norm(x)
-        return x
-    
-class Embed_2(nn.Module):
-    """Embedding module"""
-    def __init__(self, K, dim_in=1024):
-        super(Embed_2, self).__init__()
-        self.linear = nn.Linear(dim_in, K + 1)
         self.l2norm = Normalize(2)
 
     def forward(self, x):

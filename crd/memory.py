@@ -450,7 +450,7 @@ class ContrastMemoryCC(nn.Module):
         self.register_buffer('memory_v1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
 
-    def forward(self, v1, v2, y_s, y_t, y, idx=None):
+    def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
         T = self.params[1].item()
         Z_v1 = self.params[2].item()
@@ -491,17 +491,6 @@ class ContrastMemoryCC(nn.Module):
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
         
-        # clustering contrastive
-        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), y_s.unsqueeze(-1))
-        out_cluster_v2 = torch.exp(torch.div(out_cluster_v2, T))
-
-        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), y_t.unsqueeze(-1))
-        out_cluster_v1 = torch.exp(torch.div(out_cluster_v1, T))
-        
-        # Normalization and log probability
-        out_cluster_v1 = torch.div(out_cluster_v1, out_cluster_v1.sum(dim=1, keepdim=True))
-        out_cluster_v2 = torch.div(out_cluster_v2, out_cluster_v2.sum(dim=1, keepdim=True))
-
         # update memory
         with torch.no_grad():
             l_pos = torch.index_select(self.memory_v1, 0, y.view(-1))
@@ -518,6 +507,6 @@ class ContrastMemoryCC(nn.Module):
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
-        return out_v1, out_v2, out_cluster_v1, out_cluster_v2
+        return out_v1, out_v2, weight_v1, weight_v2
     
 
