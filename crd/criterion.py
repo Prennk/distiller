@@ -133,7 +133,8 @@ class ClusterLoss(nn.Module):
 
         c_i = c_i.view(batch_size, -1).t()
         c_j = c_j.view(batch_size, -1).t()
-        N = 2 * self.class_num
+        # N = 2 * self.class_num
+        N = 3896
         c = torch.cat((c_i, c_j), dim=0)
 
         sim = self.similarity_f(c.unsqueeze(1), c.unsqueeze(0)) / self.temperature
