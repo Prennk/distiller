@@ -478,7 +478,7 @@ class ContrastMemoryCC(nn.Module):
         out_v1 = torch.exp(torch.div(out_v1, T))
 
         # -
-        cluster = torch.bmm(weight_v1, weight_v2.transpose(1, 2))
+        cluster = torch.bmm(weight_v1.mean(-1).unsqueeze(-1), weight_v2.mean(-1).unsqueeze(-1).transpose(1, 2))
         cluster = cluster.mean(-1).unsqueeze(-1)
 
         # set Z if haven't been set yet
