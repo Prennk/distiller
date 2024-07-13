@@ -494,10 +494,10 @@ class ContrastMemoryCC(nn.Module):
         print(f"weight_v1: {weight_v1.transpose(1, 2).shape}")
         print(f"y_s: {y_s.shape}")
         # clustering contrastive
-        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), y_s)
+        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), y_s.unsqueeze(-1))
         out_cluster_v2 = torch.exp(torch.div(out_cluster_v2, T))
 
-        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), y_t)
+        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), y_t.unsqueeze(-1))
         out_cluster_v1 = torch.exp(torch.div(out_cluster_v1, T))
         
         # Normalization and log probability
