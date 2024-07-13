@@ -492,10 +492,10 @@ class ContrastMemoryCC(nn.Module):
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
 
         # clustering contrastive
-        out_cluster_v2 = torch.bmm(weight_v2.transpose(1, 2), v2.view(batchSize, inputSize, 1))
+        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), v2.view(batchSize, 1, inputSize))
         out_cluster_v2 = torch.exp(torch.div(out_cluster_v2, T))
 
-        out_cluster_v1 = torch.bmm(weight_v1.transpose(1, 2), v1.view(batchSize, inputSize, 1))
+        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), v1.view(batchSize, 1, inputSize))
         out_cluster_v1 = torch.exp(torch.div(out_cluster_v1, T))
         
         # Normalization and log probability
