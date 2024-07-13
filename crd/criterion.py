@@ -129,8 +129,10 @@ class ClusterLoss(nn.Module):
         ne_j = math.log(p_j.size(0)) + (p_j * torch.log(p_j)).sum()
         ne_loss = ne_i + ne_j
 
-        c_i = c_i.t()
-        c_j = c_j.t()
+        batch_size = c_i.shape[0]
+
+        c_i = c_i.view(batch_size, -1).t()
+        c_j = c_j.view(batch_size, -1).t()
         N = 2 * self.class_num
         c = torch.cat((c_i, c_j), dim=0)
 
