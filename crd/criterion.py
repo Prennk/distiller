@@ -44,7 +44,7 @@ class CRDLoss(nn.Module):
         self.criterion_s = ContrastLoss(opt.n_data)
         self.distill = opt.distill
 
-    def forward(self, f_s, f_t, idx, contrast_idx=None):
+    def forward(self, x_s, x_t, idx, contrast_idx=None):
         """
         Args:
             f_s: the feature of student network, size [batch_size, s_dim]
@@ -55,10 +55,10 @@ class CRDLoss(nn.Module):
         Returns:
             The contrastive loss
         """
-        f_s = self.embed_s(f_s)
-        f_t = self.embed_t(f_t)
-        y_s = self.embed_cluster_s(f_s)
-        y_t = self.embed_cluster_s(f_t)
+        f_s = self.embed_s(x_s)
+        f_t = self.embed_t(x_t)
+        y_s = self.embed_cluster_s(x_s)
+        y_t = self.embed_cluster_s(x_t)
         if self.distill == 'crd_cc':
             out_s, out_t, out_cluster_s, out_cluster_t = self.contrast(f_s, f_t, y_s, y_t, idx, contrast_idx)
             s_loss = self.criterion_s(out_s)
