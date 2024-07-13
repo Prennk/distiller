@@ -66,7 +66,7 @@ class CRDLoss(nn.Module):
             s_cluster_loss = self.criterion_cluster_s(out_cluster_s)
             t_cluster_loss = self.criterion_cluster_s(out_cluster_t)
 
-            loss = loss = s_loss + t_loss + s_cluster_loss + t_cluster_loss
+            loss = loss = ((s_loss + t_loss) * 0.5) + ((s_cluster_loss + t_cluster_loss) * 0.5)
         else:
             out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
             s_loss = self.criterion_s(out_s)
