@@ -491,8 +491,6 @@ class ContrastMemoryCC(nn.Module):
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
         
-        print(f"weight_v1: {weight_v1.transpose(1, 2).shape}")
-        print(f"y_s: {y_s.shape}")
         # clustering contrastive
         out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), y_s.unsqueeze(-1))
         out_cluster_v2 = torch.exp(torch.div(out_cluster_v2, T))
