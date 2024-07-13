@@ -35,7 +35,8 @@ class CRDLoss(nn.Module):
             self.contrast = ContrastMemoryWithHardNegative(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_cc':
             self.contrast = ContrastMemoryCC(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-            self.criterion_cluster = ContrastLoss(opt.n_data)
+            self.criterion_cluster_t = ContrastLoss(opt.n_data)
+            self.criterion_cluster_s = ContrastLoss(opt.n_data)
         else:
             raise KeyError('Invalid CRD variant')
         self.criterion_t = ContrastLoss(opt.n_data)
@@ -57,15 +58,16 @@ class CRDLoss(nn.Module):
         f_t = self.embed_t(f_t)
 
         if self.distill == 'crd_cc':
-            out_s, out_t, cluster = self.contrast(f_s, f_t, idx, contrast_idx)
+            out_s, out_t, weight_v1, weight_v2 = self.contrast(f_s, f_t, idx, contrast_idx)
         else:
             out_s, out_t = self.contrast(f_s, f_t, idx, contrast_idx)
 
         s_loss = self.criterion_s(out_s)
         t_loss = self.criterion_t(out_t)
-        cluster_loss = self.criterion_cluster(cluster)
+        cluster_loss_s = self.criterion_cluster(weight_v1)
+        cluster_loss_t = self.criterion_cluster(weight_v2)
 
-        loss = s_loss + t_loss + cluster_loss
+        loss = s_loss + t_loss + cluster_loss_s + cluster_loss_t
         
         return loss
 

@@ -435,7 +435,7 @@ class ContrastMemoryWithHardNegative(nn.Module):
 
 class ContrastMemoryCC(nn.Module):
     """
-    memory buffer that supplies large amount of negative samples.
+    Memory buffer that supplies a large amount of negative samples.
     """
     def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5):
         super(ContrastMemoryCC, self).__init__()
@@ -465,21 +465,27 @@ class ContrastMemoryCC(nn.Module):
         if idx is None:
             idx = self.multinomial.draw(batchSize * (self.K + 1)).view(batchSize, -1)
             idx.select(1, 0).copy_(y.data)
-
-        # instance constrastive
+        # sample
         weight_v1 = torch.index_select(self.memory_v1, 0, idx.view(-1)).detach()
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
-
+        # sample
         weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
         weight_v2 = weight_v2.view(batchSize, K + 1, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
-        # -
-        cluster = torch.bmm(weight_v1.mean(-1).unsqueeze(-1), weight_v2.mean(-1).unsqueeze(-1).transpose(1, 2))
-        cluster = cluster.mean(-1).unsqueeze(-1)
+        # Compute cluster-level similarity
+        cluster_v1 = torch.mean(weight_v1, dim=1)
+        cluster_v2 = torch.mean(weight_v2, dim=1)
+
+        cluster_sim_v1 = torch.matmul(cluster_v1, v1.t())
+        cluster_sim_v2 = torch.matmul(cluster_v2, v2.t())
+
+        # Apply temperature scaling and normalization
+        cluster_sim_v1 = torch.exp(cluster_sim_v1 / T)
+        cluster_sim_v2 = torch.exp(cluster_sim_v2 / T)
 
         # set Z if haven't been set yet
         if Z_v1 < 0:
@@ -494,7 +500,11 @@ class ContrastMemoryCC(nn.Module):
         # compute out_v1, out_v2
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
-        
+
+        # normalize cluster similarities
+        cluster_sim_v1 = torch.div(cluster_sim_v1, Z_v1).contiguous()
+        cluster_sim_v2 = torch.div(cluster_sim_v2, Z_v2).contiguous()
+
         # update memory
         with torch.no_grad():
             l_pos = torch.index_select(self.memory_v1, 0, y.view(-1))
@@ -511,6 +521,6 @@ class ContrastMemoryCC(nn.Module):
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
-        return out_v1, out_v2, cluster
+        return out_v1, out_v2, cluster_sim_v1, cluster_sim_v2
     
 
