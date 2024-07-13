@@ -471,6 +471,9 @@ class ContrastMemoryCC(nn.Module):
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
+        print('instance')
+        print(f"weight_v1: {weight_v1.shape}")
+        print(f"v2: {v2.view(batchSize, inputSize, 1).shape}")
 
         weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
         weight_v2 = weight_v2.view(batchSize, K + 1, inputSize)
@@ -492,10 +495,13 @@ class ContrastMemoryCC(nn.Module):
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
 
         # clustering contrastive
-        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), v2.view(batchSize, inputSize, 1).transpose(1, 2))
+        print('cluster')
+        print(f"weight_v1: {weight_v1.transpose(1, 2).shape}")
+        print(f"v2: {v2.view(batchSize, inputSize, 1).shape}")
+        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), v2.view(batchSize, inputSize, 1))
         out_cluster_v2 = torch.exp(torch.div(out_cluster_v2, T))
 
-        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), v1.view(batchSize, inputSize, 1).transpose(1, 2))
+        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), v1.view(batchSize, inputSize, 1))
         out_cluster_v1 = torch.exp(torch.div(out_cluster_v1, T))
         
         # Normalization and log probability
