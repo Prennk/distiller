@@ -450,7 +450,7 @@ class ContrastMemoryCC(nn.Module):
         self.register_buffer('memory_v1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
 
-    def forward(self, v1, v2, y, idx=None):
+    def forward(self, v1, v2, y_s, y_t, y, idx=None):
         K = int(self.params[0].item())
         T = self.params[1].item()
         Z_v1 = self.params[2].item()
@@ -490,14 +490,14 @@ class ContrastMemoryCC(nn.Module):
         # compute out_v1, out_v2
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
-
+        
+        print(f"weight_v1: {weight_v1.transpose(1, 2).shape}")
+        print(f"y_s: {y_s.shape}")
         # clustering contrastive
-        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), v2.view(batchSize, inputSize, 1).permute(0, 2, 1).expand(-1, 16385, -1))
-        out_cluster_v2 = torch.bmm(out_cluster_v2, v2.view(batchSize, inputSize, 1))
+        out_cluster_v2 = torch.bmm(weight_v1.transpose(1, 2), y_s)
         out_cluster_v2 = torch.exp(torch.div(out_cluster_v2, T))
 
-        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), v1.view(batchSize, inputSize, 1).permute(0, 2, 1).expand(-1, 16385, -1))
-        out_cluster_v1 = torch.bmm(out_cluster_v1, v1.view(batchSize, inputSize, 1))
+        out_cluster_v1 = torch.bmm(weight_v2.transpose(1, 2), y_t)
         out_cluster_v1 = torch.exp(torch.div(out_cluster_v1, T))
         
         # Normalization and log probability

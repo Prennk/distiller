@@ -33,6 +33,8 @@ class CRDLoss(nn.Module):
         elif opt.distill == 'crd_hardneg':
             self.contrast = ContrastMemoryWithHardNegative(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_cc':
+            self.embed_cluster_s = Embed_2(opt.nce_k, opt.s_dim)
+            self.embed_cluster_t = Embed_2(opt.nce_k, opt.t_dim)
             self.contrast = ContrastMemoryCC(100, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
             self.criterion_cluster_t = ContrastLoss(opt.n_data)
             self.criterion_cluster_s = ContrastLoss(opt.n_data)
@@ -55,8 +57,10 @@ class CRDLoss(nn.Module):
         """
         f_s = self.embed_s(f_s)
         f_t = self.embed_t(f_t)
+        y_s = self.embed_cluster_s(f_s)
+        y_t = self.embed_cluster_s(f_t)
         if self.distill == 'crd_cc':
-            out_s, out_t, out_cluster_s, out_cluster_t = self.contrast(f_s, f_t, idx, contrast_idx)
+            out_s, out_t, out_cluster_s, out_cluster_t = self.contrast(f_s, f_t, y_s, y_t, idx, contrast_idx)
             s_loss = self.criterion_s(out_s)
             t_loss = self.criterion_t(out_t)
             s_cluster_loss = self.criterion_cluster_s(out_cluster_s)
@@ -121,7 +125,19 @@ class Embed(nn.Module):
 
         x = self.l2norm(x)
         return x
+    
+class Embed_2(nn.Module):
+    """Embedding module"""
+    def __init__(self, opt, dim_in=1024):
+        super(Embed, self).__init__()
+        self.linear = nn.Linear(dim_in, opt.nce_k + 1)
+        self.l2norm = Normalize(2)
 
+    def forward(self, x):
+        x = x.view(x.shape[0], -1)
+        x = self.linear(x)
+        x = self.l2norm(x)
+        return x
 
 class Normalize(nn.Module):
     """normalization layer"""
