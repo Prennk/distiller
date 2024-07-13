@@ -33,7 +33,7 @@ class CRDLoss(nn.Module):
         elif opt.distill == 'crd_hardneg':
             self.contrast = ContrastMemoryWithHardNegative(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         elif opt.distill == 'crd_cc':
-            self.contrast = ContrastMemoryCC(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
+            self.contrast = ContrastMemoryCC(100, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
             self.criterion_cluster_t = ContrastLoss(opt.n_data)
             self.criterion_cluster_s = ContrastLoss(opt.n_data)
         else:
