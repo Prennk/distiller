@@ -128,9 +128,9 @@ class Embed(nn.Module):
     
 class Embed_2(nn.Module):
     """Embedding module"""
-    def __init__(self, opt, dim_in=1024):
+    def __init__(self, K, dim_in=1024):
         super(Embed_2, self).__init__()
-        self.linear = nn.Linear(dim_in, opt.nce_k + 1)
+        self.linear = nn.Linear(dim_in, K + 1)
         self.l2norm = Normalize(2)
 
     def forward(self, x):
