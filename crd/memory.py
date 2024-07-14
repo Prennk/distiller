@@ -449,8 +449,6 @@ class ContrastMemoryCC(nn.Module):
         stdv = 1. / math.sqrt(inputSize / 3)
         self.register_buffer('memory_v1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
-        self.register_buffer('memory_c1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
-        self.register_buffer('memory_c2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
 
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
@@ -479,12 +477,8 @@ class ContrastMemoryCC(nn.Module):
         out_v1 = torch.exp(torch.div(out_v1, T))
 
         # Compute cluster-level similarity
-        weight_c1 = torch.index_select(self.memory_c1, 0, idx.view(-1)).detach()
-        weight_c1 = weight_c1.view(batchSize, K + 1, inputSize)
-        weight_c2 = torch.index_select(self.memory_c2, 0, idx.view(-1)).detach()
-        weight_c2 = weight_c2.view(batchSize, K + 1, inputSize)
-        cluster_v1 = torch.mean(weight_c1, dim=1)
-        cluster_v2 = torch.mean(weight_c2, dim=1)
+        cluster_v1 = torch.mean(weight_v1, dim=1)
+        cluster_v2 = torch.mean(weight_v2, dim=1)
 
         cluster_sim_v1 = torch.matmul(cluster_v1, v2.t())
         cluster_sim_v2 = torch.matmul(cluster_v2, v1.t())
@@ -526,20 +520,6 @@ class ContrastMemoryCC(nn.Module):
             ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
-
-            l_pos = torch.index_select(self.memory_c1, 0, y.view(-1))
-            l_pos.mul_(momentum)
-            l_pos.add_(torch.mul(v1, 1 - momentum))
-            l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
-            updated_v1 = l_pos.div(l_norm)
-            self.memory_c1.index_copy_(0, y, updated_v1)
-
-            ab_pos = torch.index_select(self.memory_c2, 0, y.view(-1))
-            ab_pos.mul_(momentum)
-            ab_pos.add_(torch.mul(v2, 1 - momentum))
-            ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
-            updated_v2 = ab_pos.div(ab_norm)
-            self.memory_c2.index_copy_(0, y, updated_v2)
 
         return out_v1, out_v2, cluster_sim_v1, cluster_sim_v2
     
