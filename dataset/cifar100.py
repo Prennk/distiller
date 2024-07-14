@@ -307,6 +307,18 @@ def get_cifar100_dataloaders_sample(batch_size=128, num_workers=8, k=4096, mode=
     print(f"Train: {n_train_data}")
     print(f"test: {n_test_data}")
 
+    print(f"Train: {len(train_set)}")
+    print(f"test: {len(test_set)}")
+
+    sample_image, _ = train_set[0]
+    sample_image_pil = transforms.ToPILImage()(sample_image)
+    plt.figure()
+    plt.imshow(sample_image_pil)
+    plt.title('Sample Image')
+    plt.axis('off')
+    plt.text(10, 10, f'Resolution: {sample_image_pil.size}', color='white', fontsize=10, verticalalignment='top')
+    plt.show()
+
     return train_loader, test_loader, n_data
 
 def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=4096, mode='exact',
@@ -362,5 +374,17 @@ def get_upsampled_cifar100_dataloaders_sample(batch_size=8, num_workers=8, k=409
     
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
+
+    print(f"Train: {len(train_set)}")
+    print(f"test: {len(test_set)}")
+
+    sample_image, _ = train_set[0]
+    sample_image_pil = transforms.ToPILImage()(sample_image)
+    plt.figure()
+    plt.imshow(sample_image_pil)
+    plt.title('Sample Image')
+    plt.axis('off')
+    plt.text(10, 10, f'Resolution: {sample_image_pil.size}', color='white', fontsize=10, verticalalignment='top')
+    plt.show()
 
     return train_loader, test_loader, n_data
