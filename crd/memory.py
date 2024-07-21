@@ -143,12 +143,12 @@ class AliasMethod(object):
 #                                                                             #
 #-----------------------------------------------------------------------------#
 
-class ContrastMemoryTopkSampling(nn.Module):
+class ContrastMemoryModified(nn.Module):
     """
     memory buffer that supplies large amount of negative samples.
     """
     def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5):
-        super(ContrastMemoryTopkSampling, self).__init__()
+        super(ContrastMemoryModified, self).__init__()
         self.nLem = outputSize
         self.K = K
 
@@ -156,8 +156,7 @@ class ContrastMemoryTopkSampling(nn.Module):
         stdv = 1. / math.sqrt(inputSize / 3)
         self.register_buffer('memory_v1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
-        self.register_buffer('hard_negative_counts_v1', torch.zeros(outputSize))
-        self.register_buffer('hard_negative_counts_v2', torch.zeros(outputSize))
+        self.register_buffer('hard_negative_counts', torch.zeros(outputSize))
 
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
@@ -171,19 +170,23 @@ class ContrastMemoryTopkSampling(nn.Module):
         inputSize = self.memory_v1.size(1)
 
         # original score computation
-        # draw index based on topk sampling
-        idx_memory_v1 = self._get_memory_v1_hard_negative_samples(v2, y, K)
-        idx_memory_v2 = self._get_memory_v2_hard_negative_samples(v1, y, K)
+        if idx is None:
+            idx = self.multinomial.draw(batchSize * (self.K + 1)).view(batchSize, -1)
+            idx.select(1, 0).copy_(y.data)
         
         # sample
-        weight_v1 = torch.index_select(self.memory_v1, 0, idx_memory_v1.view(-1)).detach()
+        weight_v1 = torch.index_select(self.memory_v1, 0, idx.view(-1)).detach()
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
+        adaptive_weights_v1 = nn.softmax(self.hard_negative_counts / self.hard_negative_counts.mean())
+        weight_v1 = weight_v1 * adaptive_weights_v1.unsqueeze(0)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
 
         # sample
-        weight_v2 = torch.index_select(self.memory_v2, 0, idx_memory_v2.view(-1)).detach()
+        weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
         weight_v2 = weight_v2.view(batchSize, K + 1, inputSize)
+        adaptive_weights_v2 = nn.softmax(self.hard_negative_counts / self.hard_negative_counts.mean())
+        weight_v2 = weight_v2 * adaptive_weights_v2.unsqueeze(0)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
@@ -216,6 +219,8 @@ class ContrastMemoryTopkSampling(nn.Module):
             ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
+
+            self.hard_negative_counts.index_add_(0, idx.view(-1), torch.ones_like(idx.view(-1), dtype=torch.float))
 
         return out_v1, out_v2
 
