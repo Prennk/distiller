@@ -177,6 +177,8 @@ class ContrastMemoryModified(nn.Module):
         # sample
         weight_v1 = torch.index_select(self.memory_v1, 0, idx.view(-1)).detach()
         adaptive_weights_v1 = F.softmax(self.hard_negative_counts / self.hard_negative_counts.mean())
+        print(weight_v1.shape)
+        print(adaptive_weights_v1.shape)
         weight_v1 = weight_v1 * adaptive_weights_v1.unsqueeze(0)
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
