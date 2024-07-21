@@ -27,7 +27,7 @@ class CRDLoss(nn.Module):
 
         if opt.distill == "crd":
             self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-        elif opt.distill == "crd_topk":
+        elif opt.distill == "crd_modified":
             self.contrast = ContrastMemoryModified(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         else:
             raise ValueError("Invalid CRD variant")
