@@ -150,13 +150,15 @@ class ContrastMemoryModified(nn.Module):
     def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5):
         super(ContrastMemoryModified, self).__init__()
         self.nLem = outputSize
+        self.unigrams = torch.ones(self.nLem)
+        self.multinomial = AliasMethod(self.unigrams)
+        self.multinomial.cuda()
         self.K = K
 
         self.register_buffer('params', torch.tensor([K, T, -1, -1, momentum]))
         stdv = 1. / math.sqrt(inputSize / 3)
         self.register_buffer('memory_v1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
-        self.register_buffer('hard_negative_counts', torch.zeros(outputSize))
 
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
@@ -173,21 +175,13 @@ class ContrastMemoryModified(nn.Module):
         if idx is None:
             idx = self.multinomial.draw(batchSize * (self.K + 1)).view(batchSize, -1)
             idx.select(1, 0).copy_(y.data)
-        
         # sample
         weight_v1 = torch.index_select(self.memory_v1, 0, idx.view(-1)).detach()
-        adaptive_weights_v1 = F.softmax(self.hard_negative_counts / self.hard_negative_counts.mean())
-        print(weight_v1.shape)
-        print(adaptive_weights_v1.shape)
-        weight_v1 = weight_v1 * adaptive_weights_v1.unsqueeze(0)
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
-
         # sample
         weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
-        adaptive_weights_v2 = F.softmax(self.hard_negative_counts / self.hard_negative_counts.mean())
-        weight_v2 = weight_v2 * adaptive_weights_v2.unsqueeze(0)
         weight_v2 = weight_v2.view(batchSize, K + 1, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
@@ -206,15 +200,22 @@ class ContrastMemoryModified(nn.Module):
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
 
-        # update memory
+        # update memory with cross influence
         with torch.no_grad():
+            # Update memory_v1 (student) with v1 and influence from memory_v2 (teacher)
             l_pos = torch.index_select(self.memory_v1, 0, y.view(-1))
             l_pos.mul_(momentum)
             l_pos.add_(torch.mul(v1, 1 - momentum))
+            
+            # Adding influence from memory_v2 (teacher)
+            teacher_influence = torch.index_select(self.memory_v2, 0, y.view(-1))
+            l_pos.add_(torch.mul(teacher_influence, 0.1))  # 0.1 is a weight for teacher influence
+
             l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v1 = l_pos.div(l_norm)
             self.memory_v1.index_copy_(0, y, updated_v1)
 
+            # Update memory_v2 (teacher) as usual
             ab_pos = torch.index_select(self.memory_v2, 0, y.view(-1))
             ab_pos.mul_(momentum)
             ab_pos.add_(torch.mul(v2, 1 - momentum))
@@ -222,66 +223,4 @@ class ContrastMemoryModified(nn.Module):
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
-            self.hard_negative_counts.index_add_(0, idx.view(-1), torch.ones_like(idx.view(-1), dtype=torch.float))
-
         return out_v1, out_v2
-
-    def _get_memory_v1_hard_negative_samples(self, v2, y, K):
-        """
-        Get diversity-based hard negative samples from memory v1 based on cosine similarity of v2 and diversity criteria
-        """
-        # Compute cosine similarity
-        v2 = F.normalize(v2, dim=1)
-        memory = F.normalize(self.memory_v1, dim=1)
-        sim_matrix = torch.matmul(v2, memory.t())
-    
-        # Exclude positive samples
-        mask = torch.ones_like(sim_matrix)
-        mask[torch.arange(sim_matrix.size(0)), y] = 0
-        sim_matrix = sim_matrix * mask
-    
-        # Compute adaptive weights based on hard negative counts
-        adaptive_weights = torch.exp(-self.hard_negative_counts_v1 / self.hard_negative_counts_v1.mean())
-        weighted_sim_matrix = sim_matrix * adaptive_weights.unsqueeze(0)
-
-        # Select negatives
-        _, hard_negative_indices = torch.topk(weighted_sim_matrix, K, largest=True, dim=1)
-
-        # Ensure the first column is the positive sample
-        hard_negative_indices = torch.cat([y.unsqueeze(1), hard_negative_indices], dim=1)
-        
-        # Update hard negative counts
-        with torch.no_grad():
-            self.hard_negative_counts_v1.index_add_(0, hard_negative_indices.view(-1), torch.ones_like(hard_negative_indices.view(-1), dtype=torch.float))
-
-        return hard_negative_indices
-
-    def _get_memory_v2_hard_negative_samples(self, v1, y, K):
-        """
-        Get hard negative samples from memory v2 based on cosine similarity of v1
-        """
-        # Compute cosine similarity
-        v1 = F.normalize(v1, dim=1)
-        memory = F.normalize(self.memory_v2, dim=1)
-        sim_matrix = torch.matmul(v1, memory.t())
-
-        # Exclude positive samples
-        mask = torch.ones_like(sim_matrix)
-        mask[torch.arange(sim_matrix.size(0)), y] = 0
-        sim_matrix = sim_matrix * mask
-
-         # Compute adaptive weights based on hard negative counts
-        adaptive_weights = torch.exp(-self.hard_negative_counts_v2 / self.hard_negative_counts_v2.mean())
-        weighted_sim_matrix = sim_matrix * adaptive_weights.unsqueeze(0)
-
-        # Select negatives
-        _, hard_negative_indices = torch.topk(weighted_sim_matrix, K, largest=True, dim=1)
-
-        # Ensure the first column is the positive sample
-        hard_negative_indices = torch.cat([y.unsqueeze(1), hard_negative_indices], dim=1)
-        
-        # Update hard negative counts
-        with torch.no_grad():
-            self.hard_negative_counts_v2.index_add_(0, hard_negative_indices.view(-1), torch.ones_like(hard_negative_indices.view(-1), dtype=torch.float))
-
-        return hard_negative_indices
