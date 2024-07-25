@@ -167,8 +167,8 @@ class ContrastMemoryModified(nn.Module):
         self.register_buffer('centroid_v2', torch.zeros(num_clusters, inputSize))
 
         # Initialize FAISS KMeans
-        self.kmeans_v1 = faiss.Kmeans(d=inputSize, k=num_clusters, gpu=True)
-        self.kmeans_v2 = faiss.Kmeans(d=inputSize, k=num_clusters, gpu=True)
+        self.kmeans_v1 = faiss.Kmeans(d=inputSize, k=num_clusters, gpu=False)
+        self.kmeans_v2 = faiss.Kmeans(d=inputSize, k=num_clusters, gpu=False)
 
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
@@ -181,14 +181,9 @@ class ContrastMemoryModified(nn.Module):
         outputSize = self.memory_v1.size(0)
         inputSize = self.memory_v1.size(1)
 
-        # Perform clustering in batches
-        for i in range(0, self.memory_v1.size(0), 2):
-            batch_data_v1 = self.memory_v1[i:i + 2].cpu().numpy()
-            batch_data_v2 = self.memory_v2[i:i + 2].cpu().numpy()
-            print('!!!!!!!!!!!!!!!!!!!!!')
-            print(batch_data_v1.shape)
-            self.kmeans_v1.train(batch_data_v1)
-            self.kmeans_v2.train(batch_data_v2)
+        # Perform clustering
+        self.kmeans_v1.train(self.memory_v1.cpu().numpy())
+        self.kmeans_v2.train(self.memory_v2.cpu().numpy())
 
         centroid_v1 = torch.tensor(self.kmeans_v1.centroids).cuda()
         centroid_v2 = torch.tensor(self.kmeans_v2.centroids).cuda()
