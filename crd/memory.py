@@ -185,6 +185,8 @@ class ContrastMemoryModified(nn.Module):
         for i in range(0, self.memory_v1.size(0), batchSize):
             batch_data_v1 = self.memory_v1[i:i + batchSize].cpu().numpy()
             batch_data_v2 = self.memory_v2[i:i + batchSize].cpu().numpy()
+            print('!!!!!!!!!!!!!!!!!!!!!')
+            batch_data_v1.shape
             self.kmeans_v1.train(batch_data_v1)
             self.kmeans_v2.train(batch_data_v2)
 
