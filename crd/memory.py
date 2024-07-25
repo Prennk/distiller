@@ -149,7 +149,7 @@ class ContrastMemoryModified(nn.Module):
     """
     Memory buffer that supplies large amount of negative samples.
     """
-    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=10):
+    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=1000):
         super(ContrastMemoryModified, self).__init__()
         self.nLem = outputSize
         self.unigrams = torch.ones(self.nLem)
