@@ -149,7 +149,7 @@ class ContrastMemoryModified(nn.Module):
     """
     Memory buffer that supplies large amount of negative samples.
     """
-    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=64*16):
+    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=64*5):
         super(ContrastMemoryModified, self).__init__()
         self.nLem = outputSize
         self.unigrams = torch.ones(self.nLem)
@@ -193,12 +193,12 @@ class ContrastMemoryModified(nn.Module):
 
         # Compute scores with centroids
         weight_v1 = self.centroid_v1.detach()
-        weight_v1 = weight_v1.view(batchSize, 16, inputSize)
+        weight_v1 = weight_v1.view(batchSize, 5, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
 
         weight_v2 = self.centroid_v2.detach()
-        weight_v2 = weight_v2.view(batchSize, 16, inputSize)
+        weight_v2 = weight_v2.view(batchSize, 5, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
