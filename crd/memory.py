@@ -182,9 +182,9 @@ class ContrastMemoryModified(nn.Module):
         inputSize = self.memory_v1.size(1)
 
         # Perform clustering in batches
-        for i in range(0, self.memory_v1.size(0), batchSize):
-            batch_data_v1 = self.memory_v1[i:i + batchSize].cpu().numpy()
-            batch_data_v2 = self.memory_v2[i:i + batchSize].cpu().numpy()
+        for i in range(0, self.memory_v1.size(0), 8):
+            batch_data_v1 = self.memory_v1[i:i + 8].cpu().numpy()
+            batch_data_v2 = self.memory_v2[i:i + 8].cpu().numpy()
             print('!!!!!!!!!!!!!!!!!!!!!')
             print(batch_data_v1.shape)
             self.kmeans_v1.train(batch_data_v1)
