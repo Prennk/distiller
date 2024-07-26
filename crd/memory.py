@@ -151,7 +151,7 @@ class ContrastMemoryModified(nn.Module):
     """
     def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=64*16):
         super(ContrastMemoryModified, self).__init__()
-        self.nLem = outputSize
+        self.nLem = num_clusters
         self.unigrams = torch.ones(self.nLem)
         self.multinomial = AliasMethod(self.unigrams)
         self.multinomial.cuda()
@@ -166,10 +166,6 @@ class ContrastMemoryModified(nn.Module):
         self.register_buffer('centroid_v1', torch.zeros(num_clusters, inputSize))
         self.register_buffer('centroid_v2', torch.zeros(num_clusters, inputSize))
 
-        # Initialize FAISS KMeans
-        self.kmeans_v1 = faiss.Kmeans(d=inputSize, k=num_clusters, gpu=True)
-        self.kmeans_v2 = faiss.Kmeans(d=inputSize, k=num_clusters, gpu=True)
-
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
         T = self.params[1].item()
@@ -181,34 +177,33 @@ class ContrastMemoryModified(nn.Module):
         outputSize = self.memory_v1.size(0)
         inputSize = self.memory_v1.size(1)
 
+        # Initialize FAISS KMeans
+        kmeans_v1 = faiss.Kmeans(d=inputSize, k=batchSize*16, gpu=True)
+        kmeans_v2 = faiss.Kmeans(d=inputSize, k=batchSize*16, gpu=True)
+
         # Perform clustering
-        self.kmeans_v1.train(self.memory_v1.cpu().numpy())
-        self.kmeans_v2.train(self.memory_v2.cpu().numpy())
+        kmeans_v1.train(self.memory_v1.cpu().numpy())
+        kmeans_v2.train(self.memory_v2.cpu().numpy())
 
-        centroid_v1 = torch.tensor(self.kmeans_v1.centroids).cuda()
-        centroid_v2 = torch.tensor(self.kmeans_v2.centroids).cuda()
-
-        self.centroid_v1.copy_(centroid_v1)
-        self.centroid_v2.copy_(centroid_v2)
+        centroid_v1 = torch.tensor(kmeans_v1.centroids).cuda()
+        centroid_v2 = torch.tensor(kmeans_v2.centroids).cuda()
+        
+        if batchSize == 64:
+            self.centroid_v1.copy_(centroid_v1)
+            self.centroid_v2.copy_(centroid_v2)
+        else:
+            idx = torch.arange(batchSize * 16)
+            self.centroid_v1.index_copy_(0, idx, centroid_v1)
+            self.centroid_v2.index_copy_(0, idx, centroid_v2)
 
         # Compute scores with centroids
         weight_v1 = self.centroid_v1.detach()
-        if batchSize == 64:
-            weight_v1 = weight_v1.view(batchSize, self.num_clusters // batchSize, inputSize)
-        else:
-            indices = torch.arange(self.num_clusters).repeat(batchSize // self.num_clusters).cuda()
-            weight_v1 = torch.index_select(self.centroid_v1, 0, indices).detach()
-            weight_v1 = weight_v1.view(batchSize, self.num_clusters // batchSize, inputSize)
+        weight_v1 = weight_v1.view(batchSize, 16, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
 
         weight_v2 = self.centroid_v2.detach()
-        if batchSize == 64:
-            weight_v2 = weight_v2.view(batchSize, self.num_clusters // batchSize, inputSize)
-        else:
-            indices = torch.arange(self.num_clusters).repeat(batchSize // self.num_clusters).cuda()
-            weight_v2 = torch.index_select(self.centroid_v2, 0, indices).detach()
-            weight_v2 = weight_v2.view(batchSize, self.num_clusters // batchSize, inputSize)
+        weight_v2 = weight_v2.view(batchSize, 16, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
