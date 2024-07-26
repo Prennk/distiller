@@ -149,7 +149,7 @@ class ContrastMemoryModified(nn.Module):
     """
     Memory buffer that supplies large amount of negative samples.
     """
-    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=64*80):
+    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, num_clusters=64*64):
         super(ContrastMemoryModified, self).__init__()
         self.nLem = num_clusters
         self.unigrams = torch.ones(self.nLem)
@@ -178,8 +178,8 @@ class ContrastMemoryModified(nn.Module):
         inputSize = self.memory_v1.size(1)
 
         # Initialize FAISS KMeans
-        kmeans_v1 = faiss.Kmeans(d=inputSize, k=batchSize*80, gpu=True)
-        kmeans_v2 = faiss.Kmeans(d=inputSize, k=batchSize*80, gpu=True)
+        kmeans_v1 = faiss.Kmeans(d=inputSize, k=batchSize*64, gpu=True)
+        kmeans_v2 = faiss.Kmeans(d=inputSize, k=batchSize*64, gpu=True)
 
         # Perform clustering
         kmeans_v1.train(self.memory_v1.cpu().numpy())
@@ -188,19 +188,19 @@ class ContrastMemoryModified(nn.Module):
         centroid_v1 = torch.tensor(kmeans_v1.centroids).cuda()
         centroid_v2 = torch.tensor(kmeans_v2.centroids).cuda()
         
-        idx = torch.arange(batchSize * 80).cuda()
+        idx = torch.arange(batchSize * 64).cuda()
 
         self.centroid_v1.index_copy_(0, idx, centroid_v1)
         self.centroid_v2.index_copy_(0, idx, centroid_v2)
 
         # Compute scores with centroids
         weight_v1 = torch.index_select(self.centroid_v1, 0, idx).detach()
-        weight_v1 = weight_v1.view(batchSize, 80, inputSize)
+        weight_v1 = weight_v1.view(batchSize, 64, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
 
         weight_v2 = torch.index_select(self.centroid_v2, 0, idx).detach()
-        weight_v2 = weight_v2.view(batchSize, 80, inputSize)
+        weight_v2 = weight_v2.view(batchSize, 64, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
