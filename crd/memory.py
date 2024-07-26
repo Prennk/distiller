@@ -192,23 +192,19 @@ class ContrastMemoryModified(nn.Module):
         self.centroid_v2.copy_(centroid_v2)
 
         # Compute scores with centroids
+        weight_v1 = self.centroid_v1.detach()
         if batchSize == 64:
-            weight_v1 = self.centroid_v1.detach()
+            weight_v1 = weight_v1.view(batchSize, 16, inputSize)
         else:
-            indices = torch.arange(16).repeat(batchSize // 16).cuda()
-            weight_v1 = torch.index_select(self.centroid_v1, 0, indices).detach()
-
-        weight_v1 = weight_v1.view(batchSize, 16, inputSize)
+            weight_v1 = weight_v1.view(64, 16, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
 
+        weight_v2 = self.centroid_v2.detach()
         if batchSize == 64:
-            weight_v2 = self.centroid_v2.detach()
+            weight_v2 = weight_v2.view(batchSize, 16, inputSize)
         else:
-            indices = torch.arange(16).repeat(batchSize // 16).cuda()
-            weight_v2 = torch.index_select(self.centroid_v2, 0, indices).detach()
-
-        weight_v2 = weight_v2.view(batchSize, 16, inputSize)
+            weight_v2 = weight_v2.view(64, 16, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
 
