@@ -195,7 +195,7 @@ class ContrastMemoryModified(nn.Module):
         if batchSize == 64:
             weight_v1 = self.centroid_v1.detach()
         else:
-            indices = torch.arange(16).repeat(batchSize // 16)
+            indices = torch.arange(16).repeat(batchSize // 16).cuda()
             weight_v1 = torch.index_select(self.centroid_v1, 0, indices).detach()
 
         weight_v1 = weight_v1.view(batchSize, 16, inputSize)
@@ -205,7 +205,7 @@ class ContrastMemoryModified(nn.Module):
         if batchSize == 64:
             weight_v2 = self.centroid_v2.detach()
         else:
-            indices = torch.arange(16).repeat(batchSize // 16)
+            indices = torch.arange(16).repeat(batchSize // 16).cuda()
             weight_v2 = torch.index_select(self.centroid_v2, 0, indices).detach()
 
         weight_v2 = weight_v2.view(batchSize, 16, inputSize)
