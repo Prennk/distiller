@@ -178,6 +178,7 @@ class ContrastMemoryModified(nn.Module):
 
         momentum = self.params[4].item()
         batchSize = v1.size(0)
+        print('=================>', batchSize)
         outputSize = self.memory_v1.size(0)
         inputSize = self.memory_v1.size(1)
 
