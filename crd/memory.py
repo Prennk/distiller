@@ -192,7 +192,7 @@ class ContrastMemoryModified(nn.Module):
             self.centroid_v1.copy_(centroid_v1)
             self.centroid_v2.copy_(centroid_v2)
         else:
-            idx = torch.arange(batchSize * 16)
+            idx = torch.arange(batchSize * 16).cuda()
             self.centroid_v1.index_copy_(0, idx, centroid_v1)
             self.centroid_v2.index_copy_(0, idx, centroid_v2)
 
