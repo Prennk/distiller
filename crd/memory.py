@@ -206,7 +206,7 @@ class ContrastMemoryModified(nn.Module):
             l_pos.add_(torch.mul(v1, 1 - momentum))
 
             teacher_influence = torch.index_select(self.memory_v2, 0, y.view(-1))
-            l_pos.add_(torch.mul(teacher_influence, 0.9))
+            l_pos.add_(torch.mul(teacher_influence, 7.0))
 
             l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v1 = l_pos.div(l_norm)
