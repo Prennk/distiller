@@ -144,7 +144,10 @@ class AliasMethod(object):
 #-----------------------------------------------------------------------------#
 
 class ContrastMemoryModified(nn.Module):
-    def __init__(self, inputSize, outputSize, K, T=0.07, base_momentum=0.5, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    """
+    memory buffer that supplies large amount of negative samples.
+    """
+    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5):
         super(ContrastMemoryModified, self).__init__()
         self.nLem = outputSize
         self.unigrams = torch.ones(self.nLem)
@@ -152,30 +155,18 @@ class ContrastMemoryModified(nn.Module):
         self.multinomial.cuda()
         self.K = K
 
-        self.register_buffer('params', torch.tensor([K, T, -1, -1, base_momentum]))
+        self.register_buffer('params', torch.tensor([K, T, -1, -1, momentum]))
         stdv = 1. / math.sqrt(inputSize / 3)
         self.register_buffer('memory_v1', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
-
-        self.base_momentum = base_momentum
-        self.beta1 = beta1
-        self.beta2 = beta2
-        self.epsilon = epsilon
-
-        self.m_v1 = torch.zeros(outputSize, inputSize).cuda()
-        self.v_v1 = torch.zeros(outputSize, inputSize).cuda()
-        self.m_v2 = torch.zeros(outputSize, inputSize).cuda()
-        self.v_v2 = torch.zeros(outputSize, inputSize).cuda()
-
-        self.t = 0
 
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
         T = self.params[1].item()
         Z_v1 = self.params[2].item()
         Z_v2 = self.params[3].item()
-        base_momentum = self.params[4].item()
 
+        momentum = self.params[4].item()
         batchSize = v1.size(0)
         outputSize = self.memory_v1.size(0)
         inputSize = self.memory_v1.size(1)
@@ -209,50 +200,25 @@ class ContrastMemoryModified(nn.Module):
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
 
-        # update memory using Adam-like adaptive momentum
-        self.t += 1
+        # update memory
         with torch.no_grad():
-            # Update memory_v1
-            l_pos_v1 = torch.index_select(self.memory_v1, 0, y.view(-1))
-            grad_v1 = v1 - l_pos_v1
-
-            m_v1_y = torch.index_select(self.m_v1, 0, y.view(-1))
-            v_v1_y = torch.index_select(self.v_v1, 0, y.view(-1))
-
-            m_v1_y = self.beta1 * m_v1_y + (1 - self.beta1) * grad_v1
-            v_v1_y = self.beta2 * v_v1_y + (1 - self.beta2) * (grad_v1 ** 2)
-            
-            m_hat_v1 = m_v1_y / (1 - self.beta1 ** self.t)
-            v_hat_v1 = v_v1_y / (1 - self.beta2 ** self.t)
-            
-            l_pos_v1 += base_momentum * m_hat_v1 / (torch.sqrt(v_hat_v1) + self.epsilon)
-            l_norm_v1 = l_pos_v1.pow(2).sum(1, keepdim=True).pow(0.5)
-            updated_v1 = l_pos_v1.div(l_norm_v1)
-
+            l_pos = torch.index_select(self.memory_v1, 0, y.view(-1))
+            l_pos.mul_(momentum)
+            l_pos.add_(torch.mul(v1, 1 - momentum))
+            l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
+            updated_v1 = l_pos.div(l_norm)
+            l2_penalty_v1 = 1e-4 * self.memory_v1.norm(2)
             self.memory_v1.index_copy_(0, y, updated_v1)
-            self.m_v1.index_copy_(0, y, m_v1_y)
-            self.v_v1.index_copy_(0, y, v_v1_y)
+            self.memory_v1 -= l2_penalty_v1
 
-            # Update memory_v2
-            l_pos_v2 = torch.index_select(self.memory_v2, 0, y.view(-1))
-            grad_v2 = v2 - l_pos_v2
-
-            m_v2_y = torch.index_select(self.m_v2, 0, y.view(-1))
-            v_v2_y = torch.index_select(self.v_v2, 0, y.view(-1))
-
-            m_v2_y = self.beta1 * m_v2_y + (1 - self.beta1) * grad_v2
-            v_v2_y = self.beta2 * v_v2_y + (1 - self.beta2) * (grad_v2 ** 2)
-
-            m_hat_v2 = m_v2_y / (1 - self.beta1 ** self.t)
-            v_hat_v2 = v_v2_y / (1 - self.beta2 ** self.t)
-
-            l_pos_v2 += base_momentum * m_hat_v2 / (torch.sqrt(v_hat_v2) + self.epsilon)
-            l_norm_v2 = l_pos_v2.pow(2).sum(1, keepdim=True).pow(0.5)
-            updated_v2 = l_pos_v2.div(l_norm_v2)
-
+            ab_pos = torch.index_select(self.memory_v2, 0, y.view(-1))
+            ab_pos.mul_(momentum)
+            ab_pos.add_(torch.mul(v2, 1 - momentum))
+            ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
+            updated_v2 = ab_pos.div(ab_norm)
+            l2_penalty_v2 = 1e-4 * self.memory_v2.norm(2)
             self.memory_v2.index_copy_(0, y, updated_v2)
-            self.m_v2.index_copy_(0, y, m_v2_y)
-            self.v_v2.index_copy_(0, y, v_v2_y)
+            self.memory_v2 -= l2_penalty_v2
 
         return out_v1, out_v2
 
