@@ -207,7 +207,7 @@ class ContrastMemoryModified(nn.Module):
             l_pos.add_(torch.mul(v1, 1 - momentum))
             l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v1 = l_pos.div(l_norm)
-            l2_penalty_v1 = 1e-4 * self.memory_v1.norm(2)
+            l2_penalty_v1 = 1e-4 * self.memory_v1
             self.memory_v1.index_copy_(0, y, updated_v1)
             self.memory_v1 -= l2_penalty_v1
 
@@ -216,7 +216,7 @@ class ContrastMemoryModified(nn.Module):
             ab_pos.add_(torch.mul(v2, 1 - momentum))
             ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v2 = ab_pos.div(ab_norm)
-            l2_penalty_v2 = 1e-4 * self.memory_v2.norm(2)
+            l2_penalty_v2 = 1e-4 * self.memory_v2
             self.memory_v2.index_copy_(0, y, updated_v2)
             self.memory_v2 -= l2_penalty_v2
 
