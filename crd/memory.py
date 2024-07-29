@@ -144,7 +144,7 @@ class AliasMethod(object):
 #-----------------------------------------------------------------------------#
 
 class ContrastMemoryModified(nn.Module):
-    def __init__(self, inputSize, outputSize, K, T=0.07, base_momentum=0.5, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    def __init__(self, inputSize, outputSize, K, T=0.07, base_momentum=0.5):
         super(ContrastMemoryModified, self).__init__()
         self.nLem = outputSize
         self.unigrams = torch.ones(self.nLem)
@@ -158,16 +158,8 @@ class ContrastMemoryModified(nn.Module):
         self.register_buffer('memory_v2', torch.rand(outputSize, inputSize).mul_(2 * stdv).add_(-stdv))
 
         self.base_momentum = base_momentum
-        self.beta1 = beta1
-        self.beta2 = beta2
-        self.epsilon = epsilon
-
-        self.m_v1 = torch.zeros(outputSize, inputSize).cuda()
-        self.v_v1 = torch.zeros(outputSize, inputSize).cuda()
-        self.m_v2 = torch.zeros(outputSize, inputSize).cuda()
-        self.v_v2 = torch.zeros(outputSize, inputSize).cuda()
-
-        self.t = 0
+        self.grad_moving_avg_v1 = torch.zeros(inputSize)
+        self.grad_moving_avg_v2 = torch.zeros(inputSize)
 
     def forward(self, v1, v2, y, idx=None):
         K = int(self.params[0].item())
@@ -175,6 +167,10 @@ class ContrastMemoryModified(nn.Module):
         Z_v1 = self.params[2].item()
         Z_v2 = self.params[3].item()
         base_momentum = self.params[4].item()
+        
+        # Compute adaptive momentum
+        momentum_v1 = self.adaptive_momentum(v1, self.grad_moving_avg_v1, base_momentum)
+        momentum_v2 = self.adaptive_momentum(v2, self.grad_moving_avg_v2, base_momentum)
 
         batchSize = v1.size(0)
         outputSize = self.memory_v1.size(0)
@@ -209,40 +205,36 @@ class ContrastMemoryModified(nn.Module):
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
 
-        # update memory using Adam-like adaptive momentum
-        self.t += 1
+        # update memory
         with torch.no_grad():
-            # Update memory_v1
-            l_pos_v1 = torch.index_select(self.memory_v1, 0, y.view(-1))
-            grad_v1 = v1 - l_pos_v1
-
-            self.m_v1 = self.beta1 * self.m_v1 + (1 - self.beta1) * grad_v1
-            self.v_v1 = self.beta2 * self.v_v1 + (1 - self.beta2) * (grad_v1 ** 2)
-            
-            m_hat_v1 = self.m_v1 / (1 - self.beta1 ** self.t)
-            v_hat_v1 = self.v_v1 / (1 - self.beta2 ** self.t)
-            
-            l_pos_v1 += base_momentum * m_hat_v1 / (torch.sqrt(v_hat_v1) + self.epsilon)
-            l_norm_v1 = l_pos_v1.pow(2).sum(1, keepdim=True).pow(0.5)
-            updated_v1 = l_pos_v1.div(l_norm_v1)
+            l_pos = torch.index_select(self.memory_v1, 0, y.view(-1))
+            l_pos.mul_(momentum_v1)
+            l_pos.add_(torch.mul(v1, 1 - momentum_v1))
+            l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
+            updated_v1 = l_pos.div(l_norm)
             self.memory_v1.index_copy_(0, y, updated_v1)
 
-            # Update memory_v2
-            l_pos_v2 = torch.index_select(self.memory_v2, 0, y.view(-1))
-            grad_v2 = v2 - l_pos_v2
-
-            self.m_v2 = self.beta1 * self.m_v2 + (1 - self.beta1) * grad_v2
-            self.v_v2 = self.beta2 * self.v_v2 + (1 - self.beta2) * (grad_v2 ** 2)
-
-            m_hat_v2 = self.m_v2 / (1 - self.beta1 ** self.t)
-            v_hat_v2 = self.v_v2 / (1 - self.beta2 ** self.t)
-
-            l_pos_v2 += base_momentum * m_hat_v2 / (torch.sqrt(v_hat_v2) + self.epsilon)
-            l_norm_v2 = l_pos_v2.pow(2).sum(1, keepdim=True).pow(0.5)
-            updated_v2 = l_pos_v2.div(l_norm_v2)
+            ab_pos = torch.index_select(self.memory_v2, 0, y.view(-1))
+            ab_pos.mul_(momentum_v2)
+            ab_pos.add_(torch.mul(v2, 1 - momentum_v2))
+            ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
+            updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
+            # Update moving average of gradients
+            self.grad_moving_avg_v1 = 0.9 * self.grad_moving_avg_v1 + 0.1 * v1.grad.abs().mean(dim=0)
+            self.grad_moving_avg_v2 = 0.9 * self.grad_moving_avg_v2 + 0.1 * v2.grad.abs().mean(dim=0)
+
         return out_v1, out_v2
+
+    def adaptive_momentum(self, v, grad_moving_avg, base_momentum):
+        # Example rule to adjust momentum based on gradient moving average
+        grad_mean = v.grad.abs().mean()
+        if grad_mean > grad_moving_avg:
+            return base_momentum * 1.1  # increase momentum if gradient is large
+        else:
+            return base_momentum * 0.9  # decrease momentum if gradient is small
+
 
 # class ContrastMemoryModified(nn.Module):
 #     """
