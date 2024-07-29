@@ -216,31 +216,43 @@ class ContrastMemoryModified(nn.Module):
             l_pos_v1 = torch.index_select(self.memory_v1, 0, y.view(-1))
             grad_v1 = v1 - l_pos_v1
 
-            self.m_v1 = self.beta1 * self.m_v1 + (1 - self.beta1) * grad_v1
-            self.v_v1 = self.beta2 * self.v_v1 + (1 - self.beta2) * (grad_v1 ** 2)
+            m_v1_y = torch.index_select(self.m_v1, 0, y.view(-1))
+            v_v1_y = torch.index_select(self.v_v1, 0, y.view(-1))
+
+            m_v1_y = self.beta1 * m_v1_y + (1 - self.beta1) * grad_v1
+            v_v1_y = self.beta2 * v_v1_y + (1 - self.beta2) * (grad_v1 ** 2)
             
-            m_hat_v1 = self.m_v1 / (1 - self.beta1 ** self.t)
-            v_hat_v1 = self.v_v1 / (1 - self.beta2 ** self.t)
+            m_hat_v1 = m_v1_y / (1 - self.beta1 ** self.t)
+            v_hat_v1 = v_v1_y / (1 - self.beta2 ** self.t)
             
             l_pos_v1 += base_momentum * m_hat_v1 / (torch.sqrt(v_hat_v1) + self.epsilon)
             l_norm_v1 = l_pos_v1.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v1 = l_pos_v1.div(l_norm_v1)
+
             self.memory_v1.index_copy_(0, y, updated_v1)
+            self.m_v1.index_copy_(0, y, m_v1_y)
+            self.v_v1.index_copy_(0, y, v_v1_y)
 
             # Update memory_v2
             l_pos_v2 = torch.index_select(self.memory_v2, 0, y.view(-1))
             grad_v2 = v2 - l_pos_v2
 
-            self.m_v2 = self.beta1 * self.m_v2 + (1 - self.beta1) * grad_v2
-            self.v_v2 = self.beta2 * self.v_v2 + (1 - self.beta2) * (grad_v2 ** 2)
+            m_v2_y = torch.index_select(self.m_v2, 0, y.view(-1))
+            v_v2_y = torch.index_select(self.v_v2, 0, y.view(-1))
 
-            m_hat_v2 = self.m_v2 / (1 - self.beta1 ** self.t)
-            v_hat_v2 = self.v_v2 / (1 - self.beta2 ** self.t)
+            m_v2_y = self.beta1 * m_v2_y + (1 - self.beta1) * grad_v2
+            v_v2_y = self.beta2 * v_v2_y + (1 - self.beta2) * (grad_v2 ** 2)
+
+            m_hat_v2 = m_v2_y / (1 - self.beta1 ** self.t)
+            v_hat_v2 = v_v2_y / (1 - self.beta2 ** self.t)
 
             l_pos_v2 += base_momentum * m_hat_v2 / (torch.sqrt(v_hat_v2) + self.epsilon)
             l_norm_v2 = l_pos_v2.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v2 = l_pos_v2.div(l_norm_v2)
+
             self.memory_v2.index_copy_(0, y, updated_v2)
+            self.m_v2.index_copy_(0, y, m_v2_y)
+            self.v_v2.index_copy_(0, y, v_v2_y)
 
         return out_v1, out_v2
 
