@@ -189,20 +189,22 @@ class ContrastMemoryModified(nn.Module):
 
         # Set Z if haven't been set yet
         if Z_v1 < 0:
-            Z_v1 = out_v1.mean() * outputSize
-            self.params[2] = Z_v1
+            self.params[2] = out_v1.mean() * outputSize
+            Z_v1 = self.params[2].clone().detach().item()
             print("normalization constant Z_v1 is set to {:.1f}".format(Z_v1))
         else:
-            Z_v1 = self.params[2] * self.moving_average_alpha + out_v1.mean() * outputSize * (1 - self.moving_average_alpha)
-            self.params[2] = Z_v1
+            self.params[2] = self.params[2] * self.moving_average_alpha + out_v1.mean() * outputSize * (1 - self.moving_average_alpha)
+            Z_v1 = self.params[2].clone().detach().item()
+            print("normalization constant Z_v1 is set to {:.1f}".format(Z_v1))
 
         if Z_v2 < 0:
-            Z_v2 = out_v2.mean() * outputSize
-            self.params[3] = Z_v2
+            self.params[3] = out_v2.mean() * outputSize
+            Z_v2 = self.params[3].clone().detach().item()
             print("normalization constant Z_v2 is set to {:.1f}".format(Z_v2))
         else:
-            Z_v2 = self.params[3] * self.moving_average_alpha + out_v2.mean() * outputSize * (1 - self.moving_average_alpha)
-            self.params[3] = Z_v2
+            self.params[3] = self.params[3] * self.moving_average_alpha + out_v2.mean() * outputSize * (1 - self.moving_average_alpha)
+            Z_v2 = self.params[3].clone().detach().item()
+            print("normalization constant Z_v2 is set to {:.1f}".format(Z_v2))
 
         # compute out_v1, out_v2
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
