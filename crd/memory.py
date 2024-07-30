@@ -208,17 +208,18 @@ class ContrastMemoryModified(nn.Module):
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
 
+        # update memory
         with torch.no_grad():
             l_pos = torch.index_select(self.memory_v1, 0, y.view(-1))
-            # l_pos.mul_(momentum)
-            # l_pos.add_(torch.mul(v1, 1 - momentum))
+            l_pos.mul_(momentum)
+            l_pos.add_(torch.mul(v1, 1 - momentum))
             l_norm = l_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v1 = l_pos.div(l_norm)
             self.memory_v1.index_copy_(0, y, updated_v1)
 
             ab_pos = torch.index_select(self.memory_v2, 0, y.view(-1))
-            # ab_pos.mul_(momentum)
-            # ab_pos.add_(torch.mul(v2, 1 - momentum))
+            ab_pos.mul_(momentum)
+            ab_pos.add_(torch.mul(v2, 1 - momentum))
             ab_norm = ab_pos.pow(2).sum(1, keepdim=True).pow(0.5)
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
