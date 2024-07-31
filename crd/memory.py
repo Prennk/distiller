@@ -147,14 +147,13 @@ class ContrastMemoryModified(nn.Module):
     """
     Memory buffer that supplies a large amount of negative samples.
     """
-    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, anneal_rate=0.0001):
-        super(ContrastMemoryModified, self).__init__()
+    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5):
+        super(ContrastMemory, self).__init__()
         self.nLem = outputSize
         self.unigrams = torch.ones(self.nLem)
         self.multinomial = AliasMethod(self.unigrams)
         self.multinomial.cuda()
         self.K = K
-        self.anneal_rate = anneal_rate
 
         self.register_buffer('params', torch.tensor([K, T, -1, -1, momentum]))
         stdv = 1. / math.sqrt(inputSize / 3)
@@ -172,10 +171,6 @@ class ContrastMemoryModified(nn.Module):
         outputSize = self.memory_v1.size(0)
         inputSize = self.memory_v1.size(1)
 
-        # Annealing temperature
-        T = max(0.01, T - self.anneal_rate)
-        self.params[1] = T
-
         # original score computation
         if idx is None:
             idx = self.multinomial.draw(batchSize * (self.K + 1)).view(batchSize, -1)
@@ -185,25 +180,34 @@ class ContrastMemoryModified(nn.Module):
         weight_v1 = weight_v1.view(batchSize, K + 1, inputSize)
         out_v2 = torch.bmm(weight_v1, v2.view(batchSize, inputSize, 1))
         out_v2 = torch.exp(torch.div(out_v2, T))
+        out_v1_a = torch.bmm(weight_v1, v1.view(batchSize, inputSize, 1))
+        out_v1_a = torch.exp(torch.div(out_v1_a, T))
         # sample
         weight_v2 = torch.index_select(self.memory_v2, 0, idx.view(-1)).detach()
         weight_v2 = weight_v2.view(batchSize, K + 1, inputSize)
         out_v1 = torch.bmm(weight_v2, v1.view(batchSize, inputSize, 1))
         out_v1 = torch.exp(torch.div(out_v1, T))
+        out_v2_a = torch.bmm(weight_v2, v2.view(batchSize, inputSize, 1))
+        out_v2_a = torch.exp(torch.div(out_v2_a, T))
 
         # set Z if haven't been set yet
         if Z_v1 < 0:
             self.params[2] = out_v1.mean() * outputSize
             Z_v1 = self.params[2].clone().detach().item()
-            print("Normalization constant Z_v1 is set to {:.1f}".format(Z_v1))
+            print("normalization constant Z_v1 is set to {:.1f}".format(Z_v1))
         if Z_v2 < 0:
             self.params[3] = out_v2.mean() * outputSize
             Z_v2 = self.params[3].clone().detach().item()
-            print("Normalization constant Z_v2 is set to {:.1f}".format(Z_v2))
+            print("normalization constant Z_v2 is set to {:.1f}".format(Z_v2))
 
         # compute out_v1, out_v2
         out_v1 = torch.div(out_v1, Z_v1).contiguous()
         out_v2 = torch.div(out_v2, Z_v2).contiguous()
+        out_v1_a = torch.div(out_v1, Z_v1).contiguous()
+        out_v2_a = torch.div(out_v2, Z_v2).contiguous()
+
+        out_a = out_v1 + out_v1_a
+        out_b = out_v2 + out_v2_a
 
         # update memory
         with torch.no_grad():
@@ -221,4 +225,4 @@ class ContrastMemoryModified(nn.Module):
             updated_v2 = ab_pos.div(ab_norm)
             self.memory_v2.index_copy_(0, y, updated_v2)
 
-        return out_v1, out_v2
+        return out_a, out_b
