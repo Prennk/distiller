@@ -148,7 +148,7 @@ class ContrastMemoryModified(nn.Module):
     Memory buffer that supplies a large amount of negative samples.
     """
     def __init__(self, rep_dim, n_data, K, T=0.07, momentum=0.5):
-        super(ContrastMemory, self).__init__()
+        super(ContrastMemoryModified, self).__init__()
         self.nLem = n_data
         self.unigrams = torch.ones(self.nLem)
         self.multinomial = AliasMethod(self.unigrams)
