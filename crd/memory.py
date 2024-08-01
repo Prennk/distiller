@@ -157,8 +157,8 @@ class ContrastMemoryModified(nn.Module):
 
         self.register_buffer('params', torch.tensor([K, T, -1, -1, momentum]))
         stdv = 1. / math.sqrt(rep_dim / 3)
-        self.memory_v1 = nn.Parameter(torch.randn(n_data, rep_dim).mul_(2 * stdv).add_(stdv))
-        self.memory_v2 = nn.Parameter(torch.randn(n_data, rep_dim).mul_(2 * stdv).add_(stdv))
+        self.register_buffer('memory_v1', torch.rand(n_data, rep_dim).mul_(2 * stdv).add_(-stdv))
+        self.register_buffer('memory_v2', torch.rand(n_data, rep_dim).mul_(2 * stdv).add_(-stdv))
 
         self.query_layer_A = nn.Linear(rep_dim, rep_dim)
         self.key_layer_A = nn.Linear(rep_dim, rep_dim)
