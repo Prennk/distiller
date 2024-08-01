@@ -192,7 +192,7 @@ class ContrastMemoryModified(nn.Module):
         value_v1 = self.key_layer_A(weight_v1)
         attention_score_v2 = torch.matmul(query_v2, key_v1.transpose(-2, -1) / math.sqrt(query_v2.size(-1)))
         attention_weight_v2 = self.softmax(attention_score_v2)
-        out_v2 = torch.matmul(attention_weight_v2, value_v1)
+        out_v2 = torch.matmul(attention_weight_v2, value_v1).unsqueeze(-1)
         out_v2 = torch.exp(torch.div(out_v2, T))
 
         # contrast v1
@@ -203,7 +203,7 @@ class ContrastMemoryModified(nn.Module):
         value_v2 = self.key_layer_B(weight_v2)
         attention_score_v1 = torch.matmul(query_v1, key_v2.transpose(-2, -1) / math.sqrt(query_v1.size(-1)))
         attention_weight_v1 = self.softmax(attention_score_v1)
-        out_v1 = torch.matmul(attention_weight_v1, value_v2)
+        out_v1 = torch.matmul(attention_weight_v1, value_v2).unsqueeze(-1)
         out_v1 = torch.exp(torch.div(out_v1, T))
 
         # set Z if haven't been set yet
