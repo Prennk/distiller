@@ -56,7 +56,7 @@ def parse_option():
                                  'resnet8x4', 'resnet32x4', 
                                  'wrn_16_1', 'wrn_16_2', 'wrn_40_1', 'wrn_40_2',
                                  'vgg8', 'vgg11', 'vgg13', 'vgg16', 'vgg19',
-                                 'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_6_025', 'mobilenetv2_half',
+                                 'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_6_025', 'mobilenetv2_half_backbone',
                                  'ShuffleV1', 'ShuffleV2', 
                                  'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
                                  'efficientnet_b0'])
@@ -69,7 +69,7 @@ def parse_option():
     torch.manual_seed(opt.seed)
 
     # set different learning rate from these 4 models
-    if opt.model in ['mobilenetv2_6_025', 'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_half', 'ShuffleV1', 'ShuffleV2']:
+    if opt.model in ['mobilenetv2_6_025', 'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_half_backbone', 'ShuffleV1', 'ShuffleV2']:
         opt.learning_rate = 0.01
 
     # set the path according to the environment

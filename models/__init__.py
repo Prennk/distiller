@@ -33,7 +33,7 @@ model_dict = {
     # 'mobilenetv2_6_1': mobilenetv2_6_1,
     # 'mobilenetv2_6_05': mobilenetv2_6_05,
     # 'mobilenetv2_6_025': mobilenetv2_6_025,
-    'mobilenetv2_half': MobileNetV2_half_Backbone,
+    'mobilenetv2_half_backbone': MobileNetV2_half_Backbone,
     'ShuffleV1': ShuffleV1,
     'ShuffleV2': ShuffleV2,
     'darknet19': darknet19,
