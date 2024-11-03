@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from .memory import ContrastMemory, ContrastMemoryModified
+from .memory import ContrastMemory
 
 eps = 1e-7
 
@@ -24,14 +24,7 @@ class CRDLoss(nn.Module):
         super(CRDLoss, self).__init__()
         self.embed_s = Embed(opt.s_dim, opt.feat_dim)
         self.embed_t = Embed(opt.t_dim, opt.feat_dim)
-
-        if opt.distill == "crd":
-            self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-        elif opt.distill == "crd_modified":
-            self.contrast = ContrastMemoryModified(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
-        else:
-            raise ValueError("Invalid CRD variant")
-        
+        self.contrast = ContrastMemory(opt.feat_dim, opt.n_data, opt.nce_k, opt.nce_t, opt.nce_m)
         self.criterion_t = ContrastLoss(opt.n_data)
         self.criterion_s = ContrastLoss(opt.n_data)
 
