@@ -227,7 +227,7 @@ def main():
         regress_s = ConvReg(feat_s[opt.hint_layer].shape, feat_t[opt.hint_layer].shape)
         module_list.append(regress_s)
         trainable_list.append(regress_s)
-    elif opt.distill in ['crd', 'crd_modified']:
+    elif opt.distill in 'crd':
         opt.s_dim = feat_s[-1].shape[1]
         opt.t_dim = feat_t[-1].shape[1]
         opt.n_data = n_data
@@ -301,13 +301,31 @@ def main():
         init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, logger, opt)
         # classification training
         pass
+    elif opt.distill == "crd_att":
+        # crd + attention
+        opt.s_dim = feat_s[-1].shape[1]
+        opt.t_dim = feat_t[-1].shape[1]
+        opt.n_data = n_data
+        criterion_kd_1 = CRDLoss(opt)
+        module_list.append(criterion_kd_1.embed_s)
+        module_list.append(criterion_kd_1.embed_t)
+        trainable_list.append(criterion_kd_1.embed_s)
+        trainable_list.append(criterion_kd_1.embed_t)
+
+        criterion_kd_2 = Attention()
     else:
         raise NotImplementedError(opt.distill)
 
     criterion_list = nn.ModuleList([])
-    criterion_list.append(criterion_cls)    # classification loss
-    criterion_list.append(criterion_div)    # KL divergence loss, original knowledge distillation
-    criterion_list.append(criterion_kd)     # other knowledge distillation loss
+    if "_" in opt.distill: # jika gabungan dua kd method
+        criterion_list.append(criterion_cls)    # classification loss
+        criterion_list.append(criterion_div)    # KL divergence loss, original knowledge distillation
+        criterion_list.append(criterion_kd_1)
+        criterion_list.append(criterion_kd_2)
+    else:
+        criterion_list.append(criterion_cls)    # classification loss
+        criterion_list.append(criterion_div)    # KL divergence loss, original knowledge distillation
+        criterion_list.append(criterion_kd)     # other knowledge distillation loss
 
     # optimizer
     optimizer = optim.SGD(trainable_list.parameters(),
