@@ -77,7 +77,8 @@ def parse_option():
                                                                       'correlation', 'vid', 
                                                                       'crd', 'crd_modified',
                                                                       'kdsvd', 'fsp',
-                                                                      'rkd', 'pkt', 'abound', 'factor', 'nst'])
+                                                                      'rkd', 'pkt', 'abound', 'factor', 'nst',
+                                                                      "crd_att"])
     parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
 
     parser.add_argument('-r', '--gamma', type=float, default=1, help='weight for classification')
