@@ -92,8 +92,12 @@ def get_cifar100_dataloaders(batch_size=128, num_workers=8, is_instance=False):
     print(f"Train: {len(train_set)}")
     print(f"test: {len(test_set)}")
 
-    print(f"len train_set[0]: {len(train_set[0])}")
-    sample_image, _ = train_set[0]
+    if len(train_set[0]) == 2:
+        sample_image, _ = train_set[0]
+    elif len(train_set[0]) == 3:
+        sample_image, _, _ = train_set[0]
+    else:
+        raise IndexError("len(train_set[0]) ???")
     sample_image_pil = transforms.ToPILImage()(sample_image)
     plt.figure()
     plt.imshow(sample_image_pil)
