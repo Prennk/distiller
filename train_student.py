@@ -168,7 +168,7 @@ def main():
 
     # dataloader
     if opt.dataset == 'cifar100':
-        if opt.distill in 'crd' or "crd" in opt.distill.split("_"):
+        if opt.distill in ['crd']:
             if opt.upsample:
                 train_loader, val_loader, n_data = get_upsampled_cifar100_dataloaders_sample(batch_size=opt.batch_size,
                                                                                num_workers=opt.num_workers,
@@ -185,7 +185,7 @@ def main():
                                                                         is_instance=True)
         n_cls = 100
     elif opt.dataset == 'road_sign':
-        if opt.distill in ['crd', 'crd_modified']:
+        if opt.distill in ['crd']:
             train_loader, val_loader, n_data = get_road_signs_contrastive_dataloaders(batch_size=opt.batch_size,
                                                                                num_workers=opt.num_workers,
                                                                                k=opt.nce_k,
