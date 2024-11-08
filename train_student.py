@@ -77,8 +77,7 @@ def parse_option():
                                                                       'correlation', 'vid', 
                                                                       'crd', 'crd_modified',
                                                                       'kdsvd', 'fsp',
-                                                                      'rkd', 'pkt', 'abound', 'factor', 'nst',
-                                                                      "crd_att"])
+                                                                      'rkd', 'pkt', 'abound', 'factor', 'nst'])
     parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
 
     parser.add_argument('-r', '--gamma', type=float, default=1, help='weight for classification')
@@ -302,31 +301,13 @@ def main():
         init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, logger, opt)
         # classification training
         pass
-    elif opt.distill == "crd_att":
-        # crd + attention
-        opt.s_dim = feat_s[-1].shape[1]
-        opt.t_dim = feat_t[-1].shape[1]
-        opt.n_data = n_data
-        criterion_kd_1 = CRDLoss(opt)
-        module_list.append(criterion_kd_1.embed_s)
-        module_list.append(criterion_kd_1.embed_t)
-        trainable_list.append(criterion_kd_1.embed_s)
-        trainable_list.append(criterion_kd_1.embed_t)
-
-        criterion_kd_2 = Attention()
     else:
         raise NotImplementedError(opt.distill)
 
     criterion_list = nn.ModuleList([])
-    if "_" in opt.distill: # jika gabungan dua kd method
-        criterion_list.append(criterion_cls)    # classification loss
-        criterion_list.append(criterion_div)    # KL divergence loss, original knowledge distillation
-        criterion_list.append(criterion_kd_1)
-        criterion_list.append(criterion_kd_2)
-    else:
-        criterion_list.append(criterion_cls)    # classification loss
-        criterion_list.append(criterion_div)    # KL divergence loss, original knowledge distillation
-        criterion_list.append(criterion_kd)     # other knowledge distillation loss
+    criterion_list.append(criterion_cls)    # classification loss
+    criterion_list.append(criterion_div)    # KL divergence loss, original knowledge distillation
+    criterion_list.append(criterion_kd)     # other knowledge distillation loss
 
     # optimizer
     optimizer = optim.SGD(trainable_list.parameters(),

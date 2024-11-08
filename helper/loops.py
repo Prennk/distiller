@@ -78,17 +78,9 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
     elif opt.distill == 'factor':
         module_list[2].eval()
 
-    if len(criterion_list) == 3:
-        criterion_cls = criterion_list[0]
-        criterion_div = criterion_list[1]
-        criterion_kd = criterion_list[2]
-    elif len(criterion_list) == 4: # utk dua criterion kd
-        criterion_cls = criterion_list[0]
-        criterion_div = criterion_list[1]
-        criterion_kd_1 = criterion_list[2]
-        criterion_kd_2 = criterion_list[3]
-    else:
-        print(f"Len 'criterion list' = {len(criterion_list)}, not available.")
+    criterion_cls = criterion_list[0]
+    criterion_div = criterion_list[1]
+    criterion_kd = criterion_list[2]
 
     model_s = module_list[0]
     model_t = module_list[-1]
@@ -186,25 +178,10 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
             factor_s = module_list[1](feat_s[-2])
             factor_t = module_list[2](feat_t[-2], is_factor=True)
             loss_kd = criterion_kd(factor_s, factor_t)
-        elif opt.distill == "crd_att":
-            f_s = feat_s[-1]
-            f_t = feat_t[-1]
-            loss_kd_1 = criterion_kd_1(f_s, f_t, index, contrast_idx)
-
-            g_s = feat_s[1:-1]
-            g_t = feat_t[1:-1]
-            loss_group = criterion_kd_2(g_s, g_t)
-            loss_kd_2 = sum(loss_group)
         else:
             raise NotImplementedError(opt.distill)
 
-        if len(criterion_list) == 3:
-            loss = opt.gamma * loss_cls + opt.alpha * loss_div + opt.beta * loss_kd
-        elif len(criterion_list) == 4:
-            loss = opt.gamma * loss_cls + opt.alpha * loss_div + opt.beta * (loss_kd_1 + loss_kd_2)
-        else:
-            print(f"Len 'criterion list' = {len(criterion_list)}, not available.")
-
+        loss = opt.gamma * loss_cls + opt.alpha * loss_div + opt.beta * loss_kd
         acc1, acc5 = accuracy(logit_s, target, topk=(1, 5))
         losses.update(loss.item(), input.size(0))
         top1.update(acc1[0], input.size(0))
