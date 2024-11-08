@@ -169,8 +169,10 @@ def get_upsampled_cifar100_dataloaders(batch_size=8, num_workers=8, is_instance=
     plt.show()
 
     if is_instance:
+        print("instance true")
         return train_loader, test_loader, n_data
     else:
+        print("instance false")
         return train_loader, test_loader
 
 class CIFAR100InstanceSample(datasets.CIFAR100):
