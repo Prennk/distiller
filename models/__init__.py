@@ -9,6 +9,7 @@ from .ShuffleNetv2 import ShuffleV2
 from .darknet import darknet19, darknet53, darknet53e, cspdarknet53
 from .CSPdarknet import CSPDarkNet53Backbone
 from .efficientnet import efficientnet_b0
+from .repvit import repvit_m0_6, repvit_m0_9, repvit_m1_0, repvit_m1_1, repvit_m1_5, repvit_m2_3
 
 model_dict = {
     'resnet8': resnet8,
@@ -42,4 +43,10 @@ model_dict = {
     'cspdarknet53': cspdarknet53,
     'cspdarknet53_backbone': CSPDarkNet53Backbone,
     'efficientnet_b0': efficientnet_b0,
+    'repvit_m0_6': repvit_m0_6,
+    'repvit_m0_9': repvit_m0_9,
+    'repvit_m1_0': repvit_m1_0,
+    'repvit_m1_1': repvit_m1_1,
+    'repvit_m1_5': repvit_m1_5,
+    'repvit_m2_3': repvit_m2_3,
 }

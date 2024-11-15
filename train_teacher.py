@@ -59,7 +59,8 @@ def parse_option():
                                  'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_6_025', 'mobilenetv2_half_backbone',
                                  'ShuffleV1', 'ShuffleV2', 
                                  'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
-                                 'efficientnet_b0'])
+                                 'efficientnet_b0',
+                                 'repvit_m0_6', 'repvit_m0_9', 'repvit_m1_0', 'repvit_m1_1', 'repvit_m1_5', 'repvit_m2_3'])
 
     parser.add_argument('--seed', type=int, default=42, help='seed for reproducibility')
     parser.add_argument('--note', type=str, default='experiment_1', help='the experiment note')
