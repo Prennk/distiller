@@ -69,7 +69,8 @@ def parse_option():
                                  'vgg8', 'vgg11', 'vgg13', 'vgg16', 'vgg19',
                                  'mobilenetv2_6_05', 'mobilenetv2_6_1', 'mobilenetv2_6_025',
                                  'ShuffleV1', 'ShuffleV2', 
-                                 'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone'])
+                                 'darknet19', 'darknet53', 'darknet53e', 'cspdarknet53', 'cspdarknet53_backbone',
+                                 'repvit_m0_6', 'repvit_m0_9', 'repvit_m1_0', 'repvit_m1_1', 'repvit_m1_5', 'repvit_m2_3'])
     parser.add_argument('--path_t', type=str, default=None, help='teacher model snapshot')
 
     # distillation
@@ -141,7 +142,7 @@ def parse_option():
 
 def get_teacher_name(model_path):
     """parse teacher name"""
-    segments = model_path.split('/')[-2].split('_')
+    # segments = model_path.split('/')[-2].split('_')
     # if segments[0] != 'wrn':
     #     return segments[0]
     # else:
