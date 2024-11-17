@@ -147,7 +147,7 @@ def get_teacher_name(model_path):
     #     return segments[0]
     # else:
     #     return segments[0] + '_' + segments[1] + '_' + segments[2]
-    if "cspdarknet53" in model_path.split("_"):
+    if "cspdarknet53" in model_path.split("_") or model_path.split("."):
         return 'cspdarknet53_backbone'
     elif "repvit" and "m0" and "6" in model_path.split("_"):
         return "repvit_m0_6"
