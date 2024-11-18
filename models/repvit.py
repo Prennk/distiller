@@ -237,12 +237,20 @@ class RepViT(nn.Module):
         self.classifier = Classfier(output_channel, num_classes, distillation)
         
     def forward(self, x):
-        # x = self.features(x)
-        for f in self.features:
+        outputs = []
+        for i, f in enumerate(self.features):
             x = f(x)
+            if i == 2:  # RepViTBlock: 2-3
+                outputs.append(x)
+            elif i == 5:  # RepViTBlock: 2-6
+                outputs.append(x)
+            elif i == 15:  # RepViTBlock: 2-16
+                outputs.append(x)
+        
         x = torch.nn.functional.adaptive_avg_pool2d(x, 1).flatten(1)
-        x = self.classifier(x)
-        return x
+        outputs.append(self.classifier(x))
+        
+        return outputs
 
 from timm.models import register_model
 
