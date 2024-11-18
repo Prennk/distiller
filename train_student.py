@@ -187,9 +187,9 @@ def main():
                                                                                 mode=opt.mode)
         else:
             if opt.upsample:
-                train_loader, val_loader, n_data = get_upsampled_cifar100_dataloaders(batch_size=opt.batch_size,
+                train_loader, val_loader = get_upsampled_cifar100_dataloaders(batch_size=opt.batch_size,
                                                                             num_workers=opt.num_workers,
-                                                                            is_instance=True)
+                                                                            is_instance=False)
             else:
                 train_loader, val_loader, n_data = get_cifar100_dataloaders(batch_size=opt.batch_size,
                                                                             num_workers=opt.num_workers,
