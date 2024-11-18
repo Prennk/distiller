@@ -248,9 +248,12 @@ class RepViT(nn.Module):
                 outputs.append(x)
         
         x = torch.nn.functional.adaptive_avg_pool2d(x, 1).flatten(1)
-        outputs.append(self.classifier(x))
-        
-        return outputs
+        out = self.classifier(x)
+
+        if is_feat:
+            return outputs, out
+        else:
+            return out
 
 from timm.models import register_model
 
