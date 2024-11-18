@@ -236,7 +236,7 @@ class RepViT(nn.Module):
         self.features = nn.ModuleList(layers)
         self.classifier = Classfier(output_channel, num_classes, distillation)
         
-    def forward(self, x, is_feat=False):
+    def forward(self, x, is_feat=False, preact=False):
         outputs = []
         for i, f in enumerate(self.features):
             x = f(x)
