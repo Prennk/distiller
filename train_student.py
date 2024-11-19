@@ -221,7 +221,7 @@ def main():
     data = torch.randn(2, 3, 32, 32)
     model_t.eval()
     model_s.eval()
-    feat_t, _ = model_t(data)
+    feat_t, _ = model_t(data, is_feat=True)
     feat_s, _ = model_s(data, is_feat=True)
 
     module_list = nn.ModuleList([])
