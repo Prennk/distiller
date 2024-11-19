@@ -240,11 +240,11 @@ class RepViT(nn.Module):
         outputs = []
         for i, f in enumerate(self.features):
             x = f(x)
-            if i == 2:  # RepViTBlock: 2-3
-                outputs.append(x)
-            elif i == 5:  # RepViTBlock: 2-6
+            if i == 5:  # RepViTBlock: 2-6
                 outputs.append(x)
             elif i == 15:  # RepViTBlock: 2-16
+                outputs.append(x)
+            elif i == 17:  # RepViTBlock: 2-18
                 outputs.append(x)
         
         x = torch.nn.functional.adaptive_avg_pool2d(x, 1).flatten(1)
