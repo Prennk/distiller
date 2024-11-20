@@ -216,10 +216,11 @@ class Classfier(nn.Module):
             return classifier
 
 class RepViT(nn.Module):
-    def __init__(self, cfgs, num_classes=1000, distillation=False):
+    def __init__(self, cfgs, num_classes=1000, distillation=False, variant=None):
         super(RepViT, self).__init__()
         # setting of inverted residual blocks
         self.cfgs = cfgs
+        self.variant = variant
 
         # building first layer
         input_channel = self.cfgs[0][2]
@@ -285,7 +286,7 @@ def repvit_m0_6(pretrained=False, num_classes = 1000, distillation=False):
         [3,   2, 320, 0, 1, 2],
         [3,   2, 320, 1, 1, 1],
     ]
-    return RepViT(cfgs, num_classes=num_classes, distillation=distillation)
+    return RepViT(cfgs, num_classes=num_classes, distillation=distillation, variant="m0_6")
 
 def repvit_m0_9(pretrained=False, num_classes = 1000, distillation=False):
     """
@@ -355,7 +356,7 @@ def repvit_m1_0(pretrained=False, num_classes = 1000, distillation=False):
         [3,   2, 448, 1, 1, 1],
         [3,   2, 448, 0, 1, 1]
     ]
-    return RepViT(cfgs, num_classes=num_classes, distillation=distillation)
+    return RepViT(cfgs, num_classes=num_classes, distillation=distillation, variant="m0_9")
 
 
 def repvit_m1_1(pretrained=False, num_classes = 1000, distillation=False):
