@@ -135,14 +135,14 @@ class ConvReg(nn.Module):
         self.use_relu = use_relu
         s_N, s_C, s_H, s_W = s_shape
         t_N, t_C, t_H, t_W = t_shape
-        print(f"s_shape: {s_shape}")
-        print(f"t_shape: {t_shape}")
         if s_H == 2 * t_H:
             self.conv = nn.Conv2d(s_C, t_C, kernel_size=3, stride=2, padding=1)
         elif s_H * 2 == t_H:
             self.conv = nn.ConvTranspose2d(s_C, t_C, kernel_size=4, stride=2, padding=1)
         elif s_H >= t_H:
             self.conv = nn.Conv2d(s_C, t_C, kernel_size=(1+s_H-t_H, 1+s_W-t_W))
+        elif s_H < t_H:
+            self.conv = nn.ConvTranspose2d(s_C, t_C, kernel_size=(1+t_H-s_H, 1+t_W-s_W), stride=1, padding=0)
         else:
             raise NotImplemented('student size {}, teacher size {}'.format(s_H, t_H))
         self.bn = nn.BatchNorm2d(t_C)
