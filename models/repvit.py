@@ -321,7 +321,7 @@ def repvit_m0_9(pretrained=False, num_classes = 1000, distillation=False):
         [3,   2, 384, 1, 1, 1],
         [3,   2, 384, 0, 1, 1]
     ]
-    return RepViT(cfgs, num_classes=num_classes, distillation=distillation)
+    return RepViT(cfgs, num_classes=num_classes, distillation=distillation, variant="m0_9")
 
 def repvit_m1_0(pretrained=False, num_classes = 1000, distillation=False):
     """
@@ -356,7 +356,7 @@ def repvit_m1_0(pretrained=False, num_classes = 1000, distillation=False):
         [3,   2, 448, 1, 1, 1],
         [3,   2, 448, 0, 1, 1]
     ]
-    return RepViT(cfgs, num_classes=num_classes, distillation=distillation, variant="m0_9")
+    return RepViT(cfgs, num_classes=num_classes, distillation=distillation)
 
 
 def repvit_m1_1(pretrained=False, num_classes = 1000, distillation=False):
