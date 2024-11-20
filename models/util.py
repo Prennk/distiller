@@ -135,6 +135,8 @@ class ConvReg(nn.Module):
         self.use_relu = use_relu
         s_N, s_C, s_H, s_W = s_shape
         t_N, t_C, t_H, t_W = t_shape
+        print(f"s_shape: {s_shape}")
+        print(f"t_shape: {t_shape}")
         if s_H == 2 * t_H:
             self.conv = nn.Conv2d(s_C, t_C, kernel_size=3, stride=2, padding=1)
         elif s_H * 2 == t_H:
