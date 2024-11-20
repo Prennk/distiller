@@ -235,18 +235,22 @@ class RepViT(nn.Module):
             input_channel = output_channel
         self.features = nn.ModuleList(layers)
         self.classifier = Classfier(output_channel, num_classes, distillation)
+
+        self.output_layer = {
+            "m0_6": [5, 15, 17], # 2-6, 2-16, 2-18
+            "m0_9": [7, 23, 26], #2-8, 2-24, 2-27
+            } 
         
     def forward(self, x, is_feat=False, preact=False):
+        if self.variant not in self.output_layer:
+            raise ValueError(f"Invalid RepViT variant: {self.variant}")
+
         outputs = []
         for i, f in enumerate(self.features):
             x = f(x)
-            if i == 5:  # RepViTBlock: 2-6
+            if i in self.output_layer[self.variant]:
                 outputs.append(x)
-            elif i == 15:  # RepViTBlock: 2-16
-                outputs.append(x)
-            elif i == 17:  # RepViTBlock: 2-18
-                outputs.append(x)
-        
+
         x = torch.nn.functional.adaptive_avg_pool2d(x, 1).flatten(1)
         out = self.classifier(x)
 
