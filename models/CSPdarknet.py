@@ -200,6 +200,7 @@ class CSPDarkNet53Backbone(nn.Module):
     def __init__(self, num_classes=1000):
         super(CSPDarkNet53Backbone, self).__init__()
         self.backbone = darknet53(num_classes=num_classes, pretrained=False)
+        self.backbone.model = self.backbone
 
     def forward(self, x, is_feat=False, preact=False):
         x = self.backbone.conv1(x)
